@@ -2097,7 +2097,7 @@ const luckysheetSparkline = {
         this.offsetY = offsetY;
         this.pixelWidth = pixelWidth;
         this.pixelHeight = pixelHeight;
-        //context.clearRect(this.offsetX, this.offsetY, this.pixelWidth, this.pixelHeight);
+        // // context.clearRect(this.offsetX, this.offsetY, this.pixelWidth, this.pixelHeight);
 
         // qkSparkSetting.currentSparkVlaue = {
         //     shapeseq : shapeseq,

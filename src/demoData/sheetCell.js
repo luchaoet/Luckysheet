@@ -1550,7 +1550,7 @@ window.sheetCell = {
             "5_5": {
                 s: 5,
                 e: 5,
-                o: 1
+                o: 0
             }
         },
     },
@@ -1602,6 +1602,7 @@ window.sheetCell = {
         }
     ],
     "scrollLeft": 0,
-    "scrollTop": 0
+    "scrollTop": 0,
+    "frozen": {"type":"row"}
 }
 // export default sheetCell

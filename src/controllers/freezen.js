@@ -10,6 +10,7 @@ import { rowLocationByIndex, colLocationByIndex } from '../global/location';
 import Store from '../store';
 import locale from '../locale/locale';
 import { luckysheetrefreshgrid } from '../global/refresh';
+import { getRowsGroupAreaWidth, getColsGroupAreaHeight } from '../global/group';
 
 
 const luckysheetFreezen = {
@@ -91,8 +92,9 @@ const luckysheetFreezen = {
     createFreezenVertical: function (freezenverticaldata, left) {
         let _this = this;
 
-        if (_this.initialVertical) {
-            _this.initialVertical = false;
+        // 解除之前的仅初始化一次 分组导致左侧宽度动态变化
+        // if (_this.initialVertical) {
+        //     _this.initialVertical = false;
             $("#luckysheet-grid-window-1").append(_this.freezenVerticalHTML);
 
             $("#luckysheet-freezebar-vertical").find(".luckysheet-freezebar-vertical-drop").hover(function () {
@@ -116,14 +118,14 @@ const luckysheetFreezen = {
                 "height": gridheight - 10, 
                 "width": "4px", 
                 "cursor": "-webkit-grab", 
-                "top": "0px" 
+                "top":  getColsGroupAreaHeight()
             }).end().find(".luckysheet-freezebar-vertical-drop").css({ 
                 "height": gridheight - 10, 
                 "width": "4px", 
-                "top": "0px", 
+                "top": getColsGroupAreaHeight(), 
                 "cursor": "-webkit-grab" 
             });
-        }
+        // }
 
         if (freezenverticaldata == null) {
             if (_this.freezenRealFirstRowColumn) {
@@ -180,7 +182,7 @@ const luckysheetFreezen = {
         `
         $("#luckysheet-freezen-btn-horizontal").html(freezeHTML);
 
-        $("#luckysheet-freezebar-vertical").show().find(".luckysheet-freezebar-vertical-handle").css({ "left": left }).end().find(".luckysheet-freezebar-vertical-drop").css({ "left": left });
+        $("#luckysheet-freezebar-vertical").show().find(".luckysheet-freezebar-vertical-handle").css({ "left": left }).end().find(".luckysheet-freezebar-vertical-drop").css({ "left": left + getRowsGroupAreaWidth()});
     },
     saveFreezen: function (freezenhorizontaldata, top, freezenverticaldata, left) {
         let currentSheet = Store.luckysheetfile[getSheetIndex(Store.currentSheetIndex)];
@@ -375,8 +377,9 @@ const luckysheetFreezen = {
     createFreezenHorizontal: function (freezenhorizontaldata, top) {
         let _this = this;
 
-        if (_this.initialHorizontal) {
-            _this.initialHorizontal = false;
+        // 解除之前的仅初始化一次 分组导致左侧宽度动态变化
+        // if (_this.initialHorizontal) {
+            // _this.initialHorizontal = false;
             $("#luckysheet-grid-window-1").append(_this.freezenHorizontalHTML);
 
             $("#luckysheet-freezebar-horizontal").find(".luckysheet-freezebar-horizontal-drop").hover(function () {
@@ -399,14 +402,14 @@ const luckysheetFreezen = {
                 "width": gridwidth - 10, 
                 "height": "4px", 
                 "cursor": "-webkit-grab", 
-                "left": "0px" 
+                "left": getRowsGroupAreaWidth(),
             }).end().find(".luckysheet-freezebar-horizontal-drop").css({ 
                 "width": gridwidth - 10, 
                 "height": "4px", 
-                "left": "0px", 
+                "left": getRowsGroupAreaWidth(),
                 "cursor": "-webkit-grab" 
             });
-        }
+        // }
 
         if (freezenhorizontaldata == null) {
             let dataset_row_st;
@@ -472,7 +475,7 @@ const luckysheetFreezen = {
 
         $("#luckysheet-freezen-btn-horizontal").html(freezeHTML);
 
-        $("#luckysheet-freezebar-horizontal").show().find(".luckysheet-freezebar-horizontal-handle").css({ "top": top }).end().find(".luckysheet-freezebar-horizontal-drop").css({ "top": top });
+        $("#luckysheet-freezebar-horizontal").show().find(".luckysheet-freezebar-horizontal-handle").css({ "top": top + getColsGroupAreaHeight() }).end().find(".luckysheet-freezebar-horizontal-drop").css({ "top": top + getColsGroupAreaHeight() });
 
     },
     createAssistCanvas: function(){
@@ -496,11 +499,29 @@ const luckysheetFreezen = {
                 freezen_vertical_scrollTop = _this.freezenverticaldata[2];
 
                 //3
-                _this.createCanvas("freezen_3", freezen_vertical_px - freezen_vertical_scrollTop, freezen_horizon_px - freezen_horizon_scrollTop + 1, Store.rowHeaderWidth - 1, Store.columnHeaderHeight - 1);
+                _this.createCanvas(
+                    "freezen_3", 
+                    freezen_vertical_px - freezen_vertical_scrollTop, 
+                    freezen_horizon_px - freezen_horizon_scrollTop + 1, 
+                    Store.rowHeaderWidth + getRowsGroupAreaWidth() - 1, 
+                    Store.columnHeaderHeight + getColsGroupAreaHeight() - 1
+                );
                 //4
-                _this.createCanvas("freezen_4", drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, freezen_horizon_px - freezen_horizon_scrollTop + 1, freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth - 1, Store.columnHeaderHeight - 1);
+                _this.createCanvas(
+                    "freezen_4", 
+                    drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
+                    freezen_horizon_px - freezen_horizon_scrollTop + 1, 
+                    freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth + getRowsGroupAreaWidth() - 1, 
+                    Store.columnHeaderHeight + getColsGroupAreaHeight() - 1
+                );
                 //7
-                _this.createCanvas("freezen_7", freezen_vertical_px - freezen_vertical_scrollTop, drawHeight - freezen_horizon_px + freezen_horizon_scrollTop - Store.columnHeaderHeight, Store.rowHeaderWidth - 1, freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight - 1);
+                _this.createCanvas(
+                    "freezen_7", 
+                    freezen_vertical_px - freezen_vertical_scrollTop, 
+                    drawHeight - freezen_horizon_px + freezen_horizon_scrollTop - Store.columnHeaderHeight -1, 
+                    Store.rowHeaderWidth + getRowsGroupAreaWidth() - 1, 
+                    freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight + getColsGroupAreaHeight() - 1
+                );
             }
             //水平freezen
             else if (_this.freezenhorizontaldata != null) {
@@ -508,7 +529,13 @@ const luckysheetFreezen = {
                 freezen_horizon_ed = _this.freezenhorizontaldata[1];
                 freezen_horizon_scrollTop = _this.freezenhorizontaldata[2];
 
-                _this.createCanvas("freezen_h", drawWidth, freezen_horizon_px - freezen_horizon_scrollTop + 1, Store.rowHeaderWidth - 1, Store.columnHeaderHeight - 1);
+                _this.createCanvas(
+                    "freezen_h", 
+                    drawWidth, 
+                    freezen_horizon_px - freezen_horizon_scrollTop + 1, 
+                    Store.rowHeaderWidth + getRowsGroupAreaWidth() - 1, 
+                    Store.columnHeaderHeight + getColsGroupAreaHeight() - 1
+                );
             }
             //垂直freezen
             else if (_this.freezenverticaldata != null) {
@@ -516,7 +543,13 @@ const luckysheetFreezen = {
                 freezen_vertical_ed = _this.freezenverticaldata[1];
                 freezen_vertical_scrollTop = _this.freezenverticaldata[2];
 
-                _this.createCanvas("freezen_v", freezen_vertical_px - freezen_vertical_scrollTop, drawHeight, Store.rowHeaderWidth - 1, Store.columnHeaderHeight - 1);
+                _this.createCanvas(
+                    "freezen_v", 
+                    freezen_vertical_px - freezen_vertical_scrollTop, 
+                    drawHeight, 
+                    Store.rowHeaderWidth + getRowsGroupAreaWidth() - 1, 
+                    Store.columnHeaderHeight + getColsGroupAreaHeight() - 1
+                );
             }
 
             _this.scrollAdapt();

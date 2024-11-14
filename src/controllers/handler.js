@@ -70,6 +70,7 @@ import Store from "../store";
 import { createLuckyChart, hideAllNeedRangeShow } from "../expendPlugins/chart/plugin";
 import luckysheetformula from "../global/formula";
 import {createExportDialog,fetchAndDownloadXlsx} from "../expendPlugins/exportXlsx/plugin";
+import { getColsGroupAreaHeight, getRowsGroupAreaWidth } from "../global/group";
 
 //, columeflowset, rowflowset
 export default function luckysheetHandler() {
@@ -1922,7 +1923,7 @@ export default function luckysheetHandler() {
 
             $("#luckysheet-freezebar-horizontal")
                 .find(".luckysheet-freezebar-horizontal-handle")
-                .css({ top: top });
+                .css({ top: top + getColsGroupAreaHeight() });
 
             if (top + scrollTop - Store.columnHeaderHeight >= row_pre + (row - row_pre) / 2) {
                 top = row - 2 - scrollTop + Store.columnHeaderHeight;
@@ -1946,7 +1947,7 @@ export default function luckysheetHandler() {
 
             $("#luckysheet-freezebar-horizontal")
                 .find(".luckysheet-freezebar-horizontal-drop")
-                .css({ top: top });
+                .css({ top: top + getColsGroupAreaHeight() });
             luckysheetFreezen.saveFreezen(luckysheetFreezen.freezenhorizontaldata, top, null, null);
         } else if (!!luckysheetFreezen.verticalmovestate) {
             let mouse = mouseposition(event.pageX, event.pageY);
@@ -1972,7 +1973,7 @@ export default function luckysheetHandler() {
 
             $("#luckysheet-freezebar-vertical")
                 .find(".luckysheet-freezebar-vertical-handle")
-                .css({ left: left });
+                .css({ left: left + getRowsGroupAreaWidth() });
 
             if (left + scrollLeft - Store.rowHeaderWidth >= col_pre + (col - col_pre) / 2) {
                 left = col - 2 - scrollLeft + Store.rowHeaderWidth;
@@ -1996,7 +1997,7 @@ export default function luckysheetHandler() {
 
             $("#luckysheet-freezebar-vertical")
                 .find(".luckysheet-freezebar-vertical-drop")
-                .css({ left: left });
+                .css({ left: left + getRowsGroupAreaWidth() });
             luckysheetFreezen.saveFreezen(null, null, luckysheetFreezen.freezenverticaldata, left);
             luckysheetsizeauto(); //调节选区时下部单元格溢出
         } else if (!!pivotTable && pivotTable.movestate) {

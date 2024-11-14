@@ -2030,6 +2030,7 @@ export function rowColumnOperationInitial() {
         luckysheetContainerFocus();
         const {row_select, column_select, row, column } = Store.luckysheet_select_save?.[0] || {};
         const { rowsGroup, colsGroup } = getGroup();
+        
         if(row_select) {
             const [s, e] = row;
             const key = `${s}_${e}`;

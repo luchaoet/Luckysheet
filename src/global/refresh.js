@@ -1238,8 +1238,8 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
                 scrollHeight + freezen_horizon_px - freezen_horizon_scrollTop, 
                 drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
                 drawHeight - freezen_horizon_px + freezen_horizon_scrollTop, 
-                freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth, 
-                freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight
+                freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth + rowsGroupAreaWidth, 
+                freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight + colsGroupAreaHeight
             );
 
             //标题
@@ -1285,13 +1285,14 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
                 null, 
                 "freezen_h"
             );
+
             luckysheetDrawMain(
                 scrollWidth, 
                 scrollHeight + freezen_horizon_px - freezen_horizon_scrollTop, 
                 drawWidth, 
                 drawHeight - freezen_horizon_px + freezen_horizon_scrollTop, 
-                null, 
-                freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight
+                null, // offsetLeft
+                freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight + colsGroupAreaHeight // offsetTop
             );
         
             luckysheetDrawgridColumnTitle(scrollWidth, drawWidth, null);
@@ -1331,18 +1332,12 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
                 scrollHeight, 
                 drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
                 drawHeight, 
-                freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth, 
+                freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth + rowsGroupAreaWidth, 
                 null
             );
             
             luckysheetDrawgridRowTitle(scrollHeight, drawHeight, null);
-
             luckysheetDrawgridRowGroup(scrollHeight, drawHeight, null);
-            // luckysheetDrawgridRowGroup(
-            //     scrollWidth + freezen_vertical_px - freezen_vertical_scrollTop, 
-            //     drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
-            //     freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth
-            // );
             
             luckysheetDrawgridColumnTitle(freezen_vertical_scrollTop, freezen_vertical_px, Store.rowHeaderWidth);
             luckysheetDrawgridColumnTitle(
@@ -1362,19 +1357,21 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
         if($("#luckysheetTableContent").length == 0){
             return;
         }
-        let luckysheetTableContent = $("#luckysheetTableContent").get(0).getContext("2d");
-
         luckysheetDrawMain(scrollWidth, scrollHeight);
         luckysheetDrawgridColumnTitle(scrollWidth);
         luckysheetDrawgridRowTitle(scrollHeight);
 
         luckysheetDrawgridColumnGroup(scrollWidth);
         luckysheetDrawgridRowGroup(scrollHeight);
-        
-
-        //清除canvas左上角区域 防止列标题栏序列号溢出显示
-        luckysheetTableContent.clearRect(0, 0, ((Store.rowHeaderWidth + rowsGroupAreaWidth) * Store.devicePixelRatio-1) , ((Store.columnHeaderHeight + colsGroupAreaHeight) * Store.devicePixelRatio-2) );
     }
+    // 清除canvas左上角区域 防止列标题栏序列号溢出显示
+    const luckysheetTableContent = $("#luckysheetTableContent").get(0).getContext("2d");
+    luckysheetTableContent.clearRect(
+        0, 
+        0, 
+        (Store.rowHeaderWidth + rowsGroupAreaWidth) * Store.devicePixelRatio - 2, 
+        (Store.columnHeaderHeight + colsGroupAreaHeight)* Store.devicePixelRatio - 2 
+    );
     
     // 更新单元格区域宽高
     const gridW = $("#" + Store.container).width();

@@ -288,7 +288,7 @@ export function changeSheetContainerSize(gridW, gridH){
 
     
     $("#luckysheet-cols-group").height(colsGroupAreaHeight);
-    $("#luckysheet-cols-group-btns").height(colsGroupAreaHeight);
+    $("#luckysheet-left-top-placeholder").height(colsGroupAreaHeight);
 
     $("#luckysheet-rows-group-btns").width(rowsGroupAreaWidth)
     $("#luckysheet-rows-group").height(Store.cellmainHeight - Store.cellMainSrollBarSize);
