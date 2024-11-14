@@ -1,5 +1,6 @@
 import { luckysheet_searcharray } from '../controllers/sheetSearch';
 import Store from '../store';
+import { getColsGroupAreaHeight, getRowsGroupAreaWidth } from './group';
 
 function rowLocationByIndex(row_index) {
     let row = 0, row_pre = 0;
@@ -71,9 +72,8 @@ function colLocation(x) {
 
 function mouseposition(x, y) {
     let container_offset = $("#" + Store.container).offset();
-
-    let newX = x - container_offset.left - Store.rowHeaderWidth,
-        newY = y - container_offset.top - Store.infobarHeight - Store.toolbarHeight - Store.calculatebarHeight - Store.columnHeaderHeight;
+    let newX = x - container_offset.left - Store.rowHeaderWidth - getRowsGroupAreaWidth(),
+        newY = y - container_offset.top - Store.infobarHeight - Store.toolbarHeight - Store.calculatebarHeight - Store.columnHeaderHeight - getColsGroupAreaHeight();
 
     return [newX, newY];
 }

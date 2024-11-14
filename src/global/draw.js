@@ -19,6 +19,185 @@ import method from "./method";
 import Store from "../store";
 import locale from "../locale/locale";
 import sheetmanage from "../controllers/sheetmanage";
+import { getGroup, getRowsGroupAreaWidth, getColsGroupAreaHeight } from './group'
+
+function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
+    if (scrollHeight == null) {
+        scrollHeight = $("#luckysheet-cell-main").scrollTop();
+    }
+    if (drawHeight == null) {
+        drawHeight = Store.luckysheetTableContentHW[1];
+    }
+    if (offsetTop == null) {
+        offsetTop = Store.columnHeaderHeight;
+    }
+    const rowsGroupAreaWidth = getRowsGroupAreaWidth()
+    const colsGroupAreaHeight = getColsGroupAreaHeight()
+    let luckysheetTableContent = $("#luckysheetTableContent")
+        .get(0)
+        .getContext("2d");
+    luckysheetTableContent.save();
+    luckysheetTableContent.scale(Store.devicePixelRatio, Store.devicePixelRatio);
+    // luckysheetTableContent.scale(Store.zoomRatio, Store.zoomRatio);
+    luckysheetTableContent.clearRect(0, offsetTop, rowsGroupAreaWidth, drawHeight);
+
+    // luckysheetTableContent.save();
+    luckysheetTableContent.beginPath();
+    luckysheetTableContent.rect(0, offsetTop, rowsGroupAreaWidth, drawHeight);
+    luckysheetTableContent.clip();
+
+    const { rowsGroup } = getGroup()
+
+    let dataset_row_st, dataset_row_ed;
+    dataset_row_st = luckysheet_searcharray(Store.visibledatarow, scrollHeight);
+    dataset_row_ed = luckysheet_searcharray(Store.visibledatarow, scrollHeight + drawHeight);
+
+    if (dataset_row_st == -1) {
+        dataset_row_st = 0;
+    }
+    if (dataset_row_ed == -1) {
+        dataset_row_ed = Store.visibledatarow.length - 1;
+    }
+    // console.log('visibledatarow', JSON.parse(JSON.stringify(Store.visibledatarow)))
+    // console.log('rowlen', JSON.parse(JSON.stringify(Store.config.rowlen)))
+    // console.log('scrollHeight', scrollHeight)
+
+    const group = Object.values(rowsGroup);
+
+    let bodrder05 = 0.5;
+    $("#luckysheet-rows-group-btns").empty()
+    for (let i = 0; i < group.length; i++) {
+        const {s, e} = group[i];
+        // 收起/打开按钮
+        $("#luckysheet-rows-group-btns").append(`<div>${i+1}</div>`)
+        // 收起状态 自己本身是收起状态或者处于收起的范围内
+        const isClose = group.some(g => g.s <= s && g.e >= e && g.o === 0)
+        if(isClose) continue;
+
+        const rowlen = Store.config.rowlen[s] || 20;
+        const startPos = colsGroupAreaHeight + Store.visibledatarow[s] - scrollHeight - rowlen + offsetTop - 1;
+        const endPos = colsGroupAreaHeight + Store.visibledatarow[e] - scrollHeight + offsetTop - 2;
+        // 大括号
+        luckysheetTableContent.save();
+        // luckysheetTableContent.scale(Store.zoomRatio, Store.zoomRatio);
+        luckysheetTableContent.beginPath();
+        luckysheetTableContent.moveTo(bodrder05 + 15 + i * 10, startPos);
+        luckysheetTableContent.lineTo(bodrder05 + 10 + i * 10, startPos);
+        luckysheetTableContent.lineTo(bodrder05 + 10 + i * 10, endPos);
+        luckysheetTableContent.lineTo(bodrder05 + 15 + i * 10, endPos);
+        luckysheetTableContent.lineWidth = 2;
+        luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.fillStyle;
+        luckysheetTableContent.stroke();
+        luckysheetTableContent.closePath();
+        // 大括号内的点
+        for (let j = s; j <= e; j++) {
+            const rowlen = Store.config.rowlen[j] || 20;
+            const pos = colsGroupAreaHeight + Store.visibledatarow[j] - scrollHeight - rowlen / 2 + offsetTop;
+
+            luckysheetTableContent.beginPath();
+            luckysheetTableContent.arc(bodrder05 + 10 + (i+1) * 10, pos, 0.1, 0, 2 * Math.PI);
+            luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.fillStyle;
+            luckysheetTableContent.stroke();
+            luckysheetTableContent.closePath();
+        }
+        luckysheetTableContent.restore();
+        
+    }
+
+    // luckysheetTableContent.restore();
+    luckysheetTableContent.restore();
+
+}
+
+function luckysheetDrawgridColumnGroup(scrollWidth, drawWidth, offsetLeft) {
+    const rowsGroupAreaWidth = getRowsGroupAreaWidth()
+    const colsGroupAreaHeight = getColsGroupAreaHeight()
+
+    if (scrollWidth == null) {
+        scrollWidth = $("#luckysheet-cell-main").scrollLeft();
+    }
+
+    if (drawWidth == null) {
+        drawWidth = Store.luckysheetTableContentHW[0];
+    }
+
+    if (offsetLeft == null) {
+        offsetLeft = Store.rowHeaderWidth;
+    }
+
+    let luckysheetTableContent = $("#luckysheetTableContent")
+        .get(0)
+        .getContext("2d");
+    luckysheetTableContent.save();
+    luckysheetTableContent.scale(Store.devicePixelRatio, Store.devicePixelRatio);
+    luckysheetTableContent.clearRect(offsetLeft, 0, drawWidth, Store.columnHeaderHeight - 1);
+
+    luckysheetTableContent.textBaseline = luckysheetdefaultstyle.textBaseline; //基准线 垂直居中
+    luckysheetTableContent.fillStyle = luckysheetdefaultstyle.fillStyle;
+
+    let dataset_col_st, dataset_col_ed;
+    dataset_col_st = luckysheet_searcharray(Store.visibledatacolumn, scrollWidth);
+    dataset_col_ed = luckysheet_searcharray(Store.visibledatacolumn, scrollWidth + drawWidth);
+
+    if (dataset_col_st == -1) {
+        dataset_col_st = 0;
+    }
+    if (dataset_col_ed == -1) {
+        dataset_col_ed = Store.visibledatacolumn.length - 1;
+    }
+    
+    luckysheetTableContent.beginPath();
+    luckysheetTableContent.rect(offsetLeft - 1, 0, drawWidth, colsGroupAreaHeight - 1);
+    luckysheetTableContent.clip();
+
+    const { colsGroup } = getGroup()
+
+    const group = Object.values(colsGroup);
+
+    let bodrder05 = 0.5;
+    $("#luckysheet-cols-group-btns").empty()
+    for (let i = 0; i < group.length; i++) {
+        const {s, e} = group[i];
+        // 收起/打开按钮
+        $("#luckysheet-cols-group-btns").append(`<div>${i+1}</div>`)
+        // 收起状态 自己本身是收起状态或者处于收起的范围内
+        const isClose = group.some(g => g.s <= s && g.e >= e && g.o === 0)
+        if(isClose) continue;
+
+        const columnlen = Store.config.columnlen[s] || 73;
+        const startPos = rowsGroupAreaWidth + Store.visibledatacolumn[s] - scrollWidth - columnlen + offsetLeft - 1;
+        const endPos = rowsGroupAreaWidth + Store.visibledatacolumn[e] - scrollWidth + offsetLeft - 2;
+        // 大括号
+        luckysheetTableContent.save();
+        // luckysheetTableContent.scale(Store.zoomRatio, Store.zoomRatio);
+        luckysheetTableContent.beginPath();
+        luckysheetTableContent.moveTo(bodrder05 + startPos, 15 + i * 10);
+        luckysheetTableContent.lineTo(bodrder05 + startPos, 10 + i * 10);
+        luckysheetTableContent.lineTo(bodrder05 + endPos, 10 + i * 10);
+        luckysheetTableContent.lineTo(bodrder05 + endPos, 15 + i * 10);
+        luckysheetTableContent.lineWidth = 2;
+        luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.fillStyle;
+        luckysheetTableContent.stroke();
+        luckysheetTableContent.closePath();
+        // 大括号内的点
+        for (let j = s; j <= e; j++) {
+            const columnlen = Store.config.columnlen[j] || 20;
+            const pos = rowsGroupAreaWidth + Store.visibledatacolumn[j] - scrollWidth - columnlen / 2 + offsetLeft;
+
+            luckysheetTableContent.beginPath();
+            luckysheetTableContent.arc(pos, 10 + (i+1) * 10, 0.1, 0, 2 * Math.PI);
+            luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.fillStyle;
+            luckysheetTableContent.stroke();
+            luckysheetTableContent.closePath();
+        }
+
+        luckysheetTableContent.restore();
+        
+    }
+
+    
+    luckysheetTableContent.restore();
+}
 
 function luckysheetDrawgridRowTitle(scrollHeight, drawHeight, offsetTop) {
     if (scrollHeight == null) {
@@ -32,14 +211,14 @@ function luckysheetDrawgridRowTitle(scrollHeight, drawHeight, offsetTop) {
     if (offsetTop == null) {
         offsetTop = Store.columnHeaderHeight;
     }
-
+    const rowsGroupAreaWidth = getRowsGroupAreaWidth()
+    const colsGroupAreaHeight = getColsGroupAreaHeight()
     let luckysheetTableContent = $("#luckysheetTableContent")
         .get(0)
         .getContext("2d");
     luckysheetTableContent.save();
     luckysheetTableContent.scale(Store.devicePixelRatio, Store.devicePixelRatio);
-
-    luckysheetTableContent.clearRect(0, offsetTop, Store.rowHeaderWidth - 1, drawHeight);
+    luckysheetTableContent.clearRect(0, offsetTop, Store.rowHeaderWidth - 1 + rowsGroupAreaWidth, drawHeight);
 
     luckysheetTableContent.font = luckysheetdefaultFont();
     luckysheetTableContent.textBaseline = luckysheetdefaultstyle.textBaseline; //基准线 垂直居中
@@ -58,7 +237,7 @@ function luckysheetDrawgridRowTitle(scrollHeight, drawHeight, offsetTop) {
 
     luckysheetTableContent.save();
     luckysheetTableContent.beginPath();
-    luckysheetTableContent.rect(0, offsetTop - 1, Store.rowHeaderWidth - 1, drawHeight - 2);
+    luckysheetTableContent.rect(0, offsetTop - 1, Store.rowHeaderWidth - 1 + rowsGroupAreaWidth, drawHeight - 2);
     luckysheetTableContent.clip();
 
     let end_r, start_r;
@@ -66,11 +245,11 @@ function luckysheetDrawgridRowTitle(scrollHeight, drawHeight, offsetTop) {
     let preEndR;
     for (let r = dataset_row_st; r <= dataset_row_ed; r++) {
         if (r == 0) {
-            start_r = -scrollHeight - 1;
+            start_r = -scrollHeight - 1 + colsGroupAreaHeight;
         } else {
-            start_r = Store.visibledatarow[r - 1] - scrollHeight - 1;
+            start_r = Store.visibledatarow[r - 1] - scrollHeight - 1 + colsGroupAreaHeight;
         }
-        end_r = Store.visibledatarow[r] - scrollHeight;
+        end_r = Store.visibledatarow[r] - scrollHeight + colsGroupAreaHeight;
 
         //若超出绘制区域终止
         // if(end_r > scrollHeight + drawHeight){
@@ -95,11 +274,21 @@ function luckysheetDrawgridRowTitle(scrollHeight, drawHeight, offsetTop) {
             continue;
         }
 
-        if (Store.config["rowhidden"] != null && Store.config["rowhidden"][r] != null) {
+        const { rowsGroup } = getGroup();
+        const preRowClose = Object.values(rowsGroup).some(i => i.o === 0 && i.s <= r - 1 && i.e >= r - 1);
+        const currentRowClose = Object.values(rowsGroup).some(i => i.o === 0 && i.s <= r && i.e >= r);
+        const nextRowClose = Object.values(rowsGroup).some(i => i.o === 0 && i.s <= r + 1 && i.e >= r + 1);
+
+        const rowHidden = Store.config.rowhidden || {};
+        const preRowHidden = rowHidden[r - 1] != null;
+        const currentRowHidden = rowHidden[r] != null;
+        const nextRowHidden = rowHidden[r + 1] != null;
+
+        if (currentRowClose || currentRowHidden) {
         } else {
-            luckysheetTableContent.fillStyle = "#ffffff";
+            luckysheetTableContent.fillStyle = "#FFFFFF";
             luckysheetTableContent.fillRect(
-                0,
+                rowsGroupAreaWidth,
                 start_r + offsetTop + firstOffset,
                 Store.rowHeaderWidth - 1,
                 end_r - start_r + 1 + lastOffset - firstOffset,
@@ -112,8 +301,9 @@ function luckysheetDrawgridRowTitle(scrollHeight, drawHeight, offsetTop) {
             let textMetrics = getMeasureText(r + 1, luckysheetTableContent);
             //luckysheetTableContent.measureText(r + 1);
 
-            let horizonAlignPos = (Store.rowHeaderWidth - textMetrics.width) / 2;
-            let verticalAlignPos = start_r + (end_r - start_r) / 2 + offsetTop;
+            // 行号 横纵坐标
+            let horizonAlignPos = rowsGroupAreaWidth + (Store.rowHeaderWidth - textMetrics.width) / 2;
+            let verticalAlignPos =  start_r + (end_r - start_r) / 2 + offsetTop;
 
             luckysheetTableContent.fillText(
                 r + 1,
@@ -123,33 +313,47 @@ function luckysheetDrawgridRowTitle(scrollHeight, drawHeight, offsetTop) {
             luckysheetTableContent.restore(); //restore scale after draw text
         }
 
-        //vertical
+        // 右竖线
         luckysheetTableContent.beginPath();
-        luckysheetTableContent.moveTo(Store.rowHeaderWidth - 2 + bodrder05, start_r + offsetTop - 2);
-        luckysheetTableContent.lineTo(Store.rowHeaderWidth - 2 + bodrder05, end_r + offsetTop - 2);
+        luckysheetTableContent.moveTo(rowsGroupAreaWidth + Store.rowHeaderWidth - 2 + bodrder05, start_r + offsetTop - 2);
+        luckysheetTableContent.lineTo(rowsGroupAreaWidth + Store.rowHeaderWidth - 2 + bodrder05,  end_r + offsetTop - 2);
         luckysheetTableContent.lineWidth = 1;
-
         luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.strokeStyle;
         luckysheetTableContent.stroke();
         luckysheetTableContent.closePath();
 
-        //行标题栏横线,horizen
+        // 左竖线
+        luckysheetTableContent.beginPath();
+        luckysheetTableContent.moveTo(rowsGroupAreaWidth + bodrder05, start_r + offsetTop - 2);
+        luckysheetTableContent.lineTo(rowsGroupAreaWidth + bodrder05, end_r + offsetTop - 2);
+        luckysheetTableContent.lineWidth = 1;
+        luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.strokeStyle;
+        luckysheetTableContent.stroke();
+        luckysheetTableContent.closePath();
+
+        //行标题栏横线
         if (
-            Store.config["rowhidden"] != null &&
-            Store.config["rowhidden"][r] == null &&
-            Store.config["rowhidden"][r + 1] != null
+            // Store.config["rowhidden"] != null &&
+            // Store.config["rowhidden"][r] == null &&
+            // Store.config["rowhidden"][r + 1] != null
+            // 下一行为隐藏
+            (!currentRowClose && nextRowClose) || (!currentRowHidden && nextRowHidden)
         ) {
-            luckysheetTableContent.beginPath();
-            luckysheetTableContent.moveTo(-1, end_r + offsetTop - 4 + bodrder05);
-            luckysheetTableContent.lineTo(Store.rowHeaderWidth - 1, end_r + offsetTop - 4 + bodrder05);
+            luckysheetTableContent.beginPath(); 
+            luckysheetTableContent.moveTo(rowsGroupAreaWidth,  end_r + offsetTop - 4 + bodrder05);
+            luckysheetTableContent.lineTo(rowsGroupAreaWidth + Store.rowHeaderWidth, end_r + offsetTop - 4 + bodrder05);
             // luckysheetTableContent.lineWidth = 1;
             // luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.strokeStyle;
             luckysheetTableContent.closePath();
             luckysheetTableContent.stroke();
-        } else if (Store.config["rowhidden"] == null || Store.config["rowhidden"][r] == null) {
+        } else if (
+            // Store.config["rowhidden"] == null || Store.config["rowhidden"][r] == null
+            // 当前行没有隐藏
+            !currentRowClose && !currentRowHidden
+        ) {
             luckysheetTableContent.beginPath();
-            luckysheetTableContent.moveTo(-1, end_r + offsetTop - 2 + bodrder05);
-            luckysheetTableContent.lineTo(Store.rowHeaderWidth - 1, end_r + offsetTop - 2 + bodrder05);
+            luckysheetTableContent.moveTo(rowsGroupAreaWidth - 5, end_r + offsetTop - 2 + bodrder05);
+            luckysheetTableContent.lineTo(rowsGroupAreaWidth + Store.rowHeaderWidth - 1, end_r + offsetTop - 2 + bodrder05);
 
             // luckysheetTableContent.lineWidth = 1;
             // luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.strokeStyle;
@@ -157,10 +361,16 @@ function luckysheetDrawgridRowTitle(scrollHeight, drawHeight, offsetTop) {
             luckysheetTableContent.stroke();
         }
 
-        if (Store.config["rowhidden"] != null && Store.config["rowhidden"][r - 1] != null && preEndR != null) {
+        if (
+            // Store.config["rowhidden"] != null && Store.config["rowhidden"][r - 1] != null &&
+            // 上一行 为隐藏 
+            (preRowClose || preRowHidden) &&
+            preEndR != null
+
+        ) {
             luckysheetTableContent.beginPath();
-            luckysheetTableContent.moveTo(-1, preEndR + offsetTop + bodrder05);
-            luckysheetTableContent.lineTo(Store.rowHeaderWidth - 1, preEndR + offsetTop + bodrder05);
+            luckysheetTableContent.moveTo(rowsGroupAreaWidth, preEndR + offsetTop + bodrder05);
+            luckysheetTableContent.lineTo(rowsGroupAreaWidth + Store.rowHeaderWidth - 1, preEndR + offsetTop + bodrder05);
             luckysheetTableContent.closePath();
             luckysheetTableContent.stroke();
         }
@@ -205,6 +415,8 @@ function luckysheetDrawgridRowTitle(scrollHeight, drawHeight, offsetTop) {
 }
 
 function luckysheetDrawgridColumnTitle(scrollWidth, drawWidth, offsetLeft) {
+    const rowsGroupAreaWidth = getRowsGroupAreaWidth()
+    const colsGroupAreaHeight = getColsGroupAreaHeight()
     if (scrollWidth == null) {
         scrollWidth = $("#luckysheet-cell-main").scrollLeft();
     }
@@ -222,7 +434,7 @@ function luckysheetDrawgridColumnTitle(scrollWidth, drawWidth, offsetLeft) {
         .getContext("2d");
     luckysheetTableContent.save();
     luckysheetTableContent.scale(Store.devicePixelRatio, Store.devicePixelRatio);
-    luckysheetTableContent.clearRect(offsetLeft, 0, drawWidth, Store.columnHeaderHeight - 1);
+    luckysheetTableContent.clearRect(offsetLeft + rowsGroupAreaWidth, 0, drawWidth, Store.columnHeaderHeight - 1);
 
     luckysheetTableContent.font = luckysheetdefaultFont();
     luckysheetTableContent.textBaseline = luckysheetdefaultstyle.textBaseline; //基准线 垂直居中
@@ -239,23 +451,16 @@ function luckysheetDrawgridColumnTitle(scrollWidth, drawWidth, offsetLeft) {
         dataset_col_ed = Store.visibledatacolumn.length - 1;
     }
 
-    luckysheetTableContent.save();
-    luckysheetTableContent.beginPath();
-    luckysheetTableContent.rect(offsetLeft - 1, 0, drawWidth, Store.columnHeaderHeight - 1);
-    luckysheetTableContent.clip();
-
-    // console.log(offsetLeft, 0, drawWidth, Store.columnHeaderHeight -1);
-
     let end_c, start_c;
     let bodrder05 = 0.5; //Default 0.5
     let preEndC;
     for (let c = dataset_col_st; c <= dataset_col_ed; c++) {
         if (c == 0) {
-            start_c = -scrollWidth;
+            start_c = -scrollWidth + rowsGroupAreaWidth;
         } else {
-            start_c = Store.visibledatacolumn[c - 1] - scrollWidth;
+            start_c = Store.visibledatacolumn[c - 1] - scrollWidth + rowsGroupAreaWidth;
         }
-        end_c = Store.visibledatacolumn[c] - scrollWidth;
+        end_c = Store.visibledatacolumn[c] - scrollWidth + rowsGroupAreaWidth;
 
         //若超出绘制区域终止
         // if(end_c > scrollWidth + drawWidth+1){
@@ -281,8 +486,8 @@ function luckysheetDrawgridColumnTitle(scrollWidth, drawWidth, offsetLeft) {
 
         if (Store.config["colhidden"] != null && Store.config["colhidden"][c] != null) {
         } else {
-            luckysheetTableContent.fillStyle = "#ffffff";
-            luckysheetTableContent.fillRect(start_c + offsetLeft - 1, 0, end_c - start_c, Store.columnHeaderHeight - 1);
+            luckysheetTableContent.fillStyle = "#fff";
+            luckysheetTableContent.fillRect(start_c + offsetLeft - 1, colsGroupAreaHeight, end_c - start_c, Store.columnHeaderHeight - 1);
             luckysheetTableContent.fillStyle = "#000000";
 
             //列标题栏序列号
@@ -293,7 +498,7 @@ function luckysheetDrawgridColumnTitle(scrollWidth, drawWidth, offsetLeft) {
             //luckysheetTableContent.measureText(abc);
 
             let horizonAlignPos = Math.round(start_c + (end_c - start_c) / 2 + offsetLeft - textMetrics.width / 2);
-            let verticalAlignPos = Math.round(Store.columnHeaderHeight / 2);
+            let verticalAlignPos = Math.round(Store.columnHeaderHeight / 2 + colsGroupAreaHeight);
 
             luckysheetTableContent.fillText(abc, horizonAlignPos / Store.zoomRatio, verticalAlignPos / Store.zoomRatio);
             luckysheetTableContent.restore(); //restore scale after draw text
@@ -306,16 +511,16 @@ function luckysheetDrawgridColumnTitle(scrollWidth, drawWidth, offsetLeft) {
             Store.config["colhidden"][c + 1] != null
         ) {
             luckysheetTableContent.beginPath();
-            luckysheetTableContent.moveTo(end_c + offsetLeft - 4 + bodrder05, 0);
-            luckysheetTableContent.lineTo(end_c + offsetLeft - 4 + bodrder05, Store.columnHeaderHeight - 2);
+            luckysheetTableContent.moveTo(end_c + offsetLeft - 4 + bodrder05, colsGroupAreaHeight);
+            luckysheetTableContent.lineTo(end_c + offsetLeft - 4 + bodrder05, colsGroupAreaHeight + Store.columnHeaderHeight - 2);
             luckysheetTableContent.lineWidth = 1;
             luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.strokeStyle;
             luckysheetTableContent.closePath();
             luckysheetTableContent.stroke();
         } else if (Store.config["colhidden"] == null || Store.config["colhidden"][c] == null) {
             luckysheetTableContent.beginPath();
-            luckysheetTableContent.moveTo(end_c + offsetLeft - 2 + bodrder05, 0);
-            luckysheetTableContent.lineTo(end_c + offsetLeft - 2 + bodrder05, Store.columnHeaderHeight - 2);
+            luckysheetTableContent.moveTo(end_c + offsetLeft - 2 + bodrder05, colsGroupAreaHeight);
+            luckysheetTableContent.lineTo(end_c + offsetLeft - 2 + bodrder05, colsGroupAreaHeight + Store.columnHeaderHeight - 2);
 
             luckysheetTableContent.lineWidth = 1;
             luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.strokeStyle;
@@ -325,23 +530,28 @@ function luckysheetDrawgridColumnTitle(scrollWidth, drawWidth, offsetLeft) {
 
         if (Store.config["colhidden"] != null && Store.config["colhidden"][c - 1] != null && preEndC != null) {
             luckysheetTableContent.beginPath();
-            luckysheetTableContent.moveTo(preEndC + offsetLeft + bodrder05, 0);
-            luckysheetTableContent.lineTo(preEndC + offsetLeft + bodrder05, Store.columnHeaderHeight - 2);
+            luckysheetTableContent.moveTo(preEndC + offsetLeft + bodrder05, colsGroupAreaHeight);
+            luckysheetTableContent.lineTo(preEndC + offsetLeft + bodrder05, colsGroupAreaHeight + Store.columnHeaderHeight - 2);
             // luckysheetTableContent.lineWidth = 1;
             // luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.strokeStyle;
             luckysheetTableContent.closePath();
             luckysheetTableContent.stroke();
         }
 
-        //horizen
+        // 上横线
         luckysheetTableContent.beginPath();
-        luckysheetTableContent.moveTo(start_c + offsetLeft - 1, Store.columnHeaderHeight - 2 + bodrder05);
-        luckysheetTableContent.lineTo(end_c + offsetLeft - 1, Store.columnHeaderHeight - 2 + bodrder05);
-        // luckysheetTableContent.lineWidth = 1;
-
-        // luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.strokeStyle;
+        luckysheetTableContent.moveTo(start_c + offsetLeft - 1, colsGroupAreaHeight + bodrder05);
+        luckysheetTableContent.lineTo(end_c + offsetLeft - 1, colsGroupAreaHeight + bodrder05);
         luckysheetTableContent.stroke();
         luckysheetTableContent.closePath();
+        // 下横线
+        luckysheetTableContent.beginPath();
+        luckysheetTableContent.moveTo(start_c + offsetLeft - 1, colsGroupAreaHeight + Store.columnHeaderHeight - 2 + bodrder05);
+        luckysheetTableContent.lineTo(end_c + offsetLeft - 1, colsGroupAreaHeight + Store.columnHeaderHeight - 2 + bodrder05);
+        luckysheetTableContent.stroke();
+        luckysheetTableContent.closePath();
+
+        
 
         preEndC = end_c;
 
@@ -377,7 +587,7 @@ function luckysheetDrawgridColumnTitle(scrollWidth, drawWidth, offsetLeft) {
     // luckysheetTableContent.clearRect(0, 0, Store.rowHeaderWidth , Store.columnHeaderHeight );
 
     // Must be restored twice, otherwise it will be enlarged under window.devicePixelRatio = 1.5
-    luckysheetTableContent.restore();
+    // luckysheetTableContent.restore();
     luckysheetTableContent.restore();
 }
 
@@ -397,6 +607,8 @@ function luckysheetDrawMain(
     }
 
     let sheetFile = sheetmanage.getSheetByIndex();
+    const rowsGroupAreaWidth = getRowsGroupAreaWidth()
+    const colsGroupAreaHeight = getColsGroupAreaHeight()
 
     // console.trace();
     clearTimeout(Store.measureTextCacheTimeOut);
@@ -417,10 +629,10 @@ function luckysheetDrawMain(
     }
 
     if (offsetLeft == null) {
-        offsetLeft = Store.rowHeaderWidth;
+        offsetLeft = Store.rowHeaderWidth + rowsGroupAreaWidth;
     }
     if (offsetTop == null) {
-        offsetTop = Store.columnHeaderHeight;
+        offsetTop = Store.columnHeaderHeight + colsGroupAreaHeight;
     }
 
     if (columnOffsetCell == null) {
@@ -523,6 +735,7 @@ function luckysheetDrawMain(
         fill_col_ed - scrollWidth,
         fill_row_ed - scrollHeight,
     );
+
     luckysheetTableContent.font = luckysheetdefaultFont();
     // luckysheetTableContent.textBaseline = "top";
     luckysheetTableContent.fillStyle = luckysheetdefaultstyle.fillStyle;
@@ -547,7 +760,11 @@ function luckysheetDrawMain(
 
         let end_r = Store.visibledatarow[r] - scrollHeight;
 
-        if (Store.config["rowhidden"] != null && Store.config["rowhidden"][r] != null) {
+        const { rowsGroup } = getGroup()
+        const isRowGroupClose = Object.values(rowsGroup).some(i => i.o === 0 && i.s <= r && i.e >= r)
+        const isRowHidden = Store.config["rowhidden"] != null && Store.config["rowhidden"][r] != null;
+
+        if (isRowHidden || isRowGroupClose) {
             continue;
         }
 
@@ -2307,7 +2524,9 @@ function cellTextRender(textInfo, ctx, option) {
 
 export {
     luckysheetDrawgridRowTitle,
+    luckysheetDrawgridRowGroup,
     luckysheetDrawgridColumnTitle,
+    luckysheetDrawgridColumnGroup,
     luckysheetDrawMain,
     getCellOverflowMap,
     sparklinesRender,

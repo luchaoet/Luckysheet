@@ -32,6 +32,7 @@ import menuButton from "./menuButton";
 import method from "../global/method";
 import { initialEvent } from "./protection";
 import luckysheetformula from "../global/formula";
+import { getRowsGroupAreaWidth } from "../global/group";
 
 const sheetmanage = {
     generateRandomSheetIndex: function(prefix) {
@@ -1639,6 +1640,11 @@ const sheetmanage = {
         $("#luckysheet-sheettable_0").css({ width: Store.ch_width - 1, height: Store.rh_height });
         $("#luckysheetrowHeader_0").css("height", Store.rh_height);
         $("#luckysheet-cols-h-cells_0").css("width", Store.ch_width); //width更新
+
+        // 分组
+        const rowsGroupAreaWidth = getRowsGroupAreaWidth()
+        $("#luckysheet-rows-group-btns").width(rowsGroupAreaWidth)
+        $("#luckysheet-rows-group").height(Store.cellmainHeight - Store.cellMainSrollBarSize);
 
         $("#luckysheet-scrollbar-x div").width(Store.ch_width);
         $("#luckysheet-scrollbar-y div").height(

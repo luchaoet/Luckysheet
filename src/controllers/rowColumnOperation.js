@@ -12,7 +12,7 @@ import { isRealNull, isRealNum, hasPartMC, isEditMode, checkIsAllowEdit } from "
 import { countfunc } from "../global/count";
 import formula from "../global/formula";
 import { luckysheetextendtable, luckysheetdeletetable, luckysheetDeleteCell } from "../global/extend";
-import { jfrefreshgrid, jfrefreshgridall, jfrefreshgrid_rhcw } from "../global/refresh";
+import { jfrefreshgrid, jfrefreshgridall, jfrefreshgrid_rhcw, luckysheetrefreshgrid } from "../global/refresh";
 import { getcellvalue } from "../global/getdata";
 import tooltip from "../global/tooltip";
 import editor from "../global/editor";
@@ -27,8 +27,23 @@ import {
 } from "./protection";
 import Store from "../store";
 import luckysheetConfigsetting from "./luckysheetConfigsetting";
+import { toggleState, getGroup, addRowsGroupItem, addColsGroupItem, deleteRowsGroupItem, deleteColsGroupItem  } from "../global/group";
 
 export function rowColumnOperationInitial() {
+
+    $("#luckysheet-rows-group-btns").on('click', 'div', function(event) {
+        const index = $(this).index()
+        toggleState('row', index)
+        jfrefreshgrid_rhcw(Store.flowdata.length, Store.flowdata[0].length);
+    });
+
+    $("#luckysheet-cols-group-btns").on('click', 'div', function(event) {
+        const index = $(this).index()
+        toggleState('col', index)
+        jfrefreshgrid_rhcw(Store.flowdata.length, Store.flowdata[0].length);
+    });
+
+
     //表格行标题 mouse事件
     $("#luckysheet-rows-h")
         .mousedown(function(event) {
@@ -2010,6 +2025,34 @@ export function rowColumnOperationInitial() {
             jfrefreshgrid_rhcw(Store.flowdata.length, Store.flowdata[0].length);
         }
     });
+    $("#luckysheet-row-col-group").click(function() {
+        $("#luckysheet-rightclick-menu").hide();
+        luckysheetContainerFocus();
+        const {row_select, column_select, row, column } = Store.luckysheet_select_save?.[0] || {};
+        const { rowsGroup, colsGroup } = getGroup();
+        if(row_select) {
+            const [s, e] = row;
+            const key = `${s}_${e}`;
+            if(key in rowsGroup) {
+                deleteRowsGroupItem(s, e)
+            }else{
+                addRowsGroupItem(s, e)
+            }
+        }
+        if(column_select) {
+            const [s, e] = column;
+            const key = `${s}_${e}`;
+            if(key in colsGroup) {
+                deleteColsGroupItem(s, e)
+            }else{
+                addColsGroupItem(s, e)
+            }
+        }
+
+        Store.luckysheetfile[getSheetIndex(Store.currentSheetIndex)].config = Store.config;
+        //行高、列宽 刷新
+        jfrefreshgrid_rhcw(Store.flowdata.length, Store.flowdata[0].length);
+    })
     //隐藏、显示行
     // $("#luckysheet-hidRows").click(function (event) {
     //     if(!checkProtectionAuthorityNormal(Store.currentSheetIndex, "formatRows")){

@@ -183,7 +183,7 @@
 							// console.info(range)
 						},
 						workbookCreateAfter: function (json) {
-							console.info('workbook create after!!!!====',json)
+							console.info('workbook create after!!!!====', json)
 						},
 						rangePasteBefore: function (range, data) {
 							// console.info('rangePasteBefore',range,data)
@@ -1895,7 +1895,11 @@
 				customs: [{
 					title: 'test',
 					onClick: function (clickEvent, event, params) {
-						console.log('function test click', clickEvent, event, params)
+						luckysheet.setCellValue(0, 0, '=Cell!A1', { order: 1 })
+						// debugger
+						luckysheet.setCellValue(0, 0, new Date().getMilliseconds(), { order: 0 })
+						// setTimeout(() => {
+						// }, 2000);
 					}
 				}]
 			}

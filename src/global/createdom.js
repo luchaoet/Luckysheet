@@ -19,6 +19,7 @@ import rhchInit from './rhchInit';
 import { replaceHtml } from '../utils/util';
 import Store from '../store';
 import locale from '../locale/locale';
+import { getColsGroupAreaHeight, getRowsGroupAreaWidth } from './group';
 
 export default function luckysheetcreatedom(colwidth, rowheight, data, menu, title) {
     // //最少30行
@@ -100,6 +101,9 @@ export default function luckysheetcreatedom(colwidth, rowheight, data, menu, tit
 
     $("#" + Store.container).append(gh);
 
+    const rowsGroupAreaWidth = getRowsGroupAreaWidth()
+    const colsGroupAreaHeight = getColsGroupAreaHeight()
+
     $("#luckysheet-scrollbar-x div").width(Store.ch_width);
     $("#luckysheet-scrollbar-y div").height(Store.rh_height + Store.columnHeaderHeight - Store.cellMainSrollBarSize - 3);
 
@@ -112,12 +116,21 @@ export default function luckysheetcreatedom(colwidth, rowheight, data, menu, tit
     $("body").append(replaceHtml(filtersubmenuHTML(), { "menuid": "filter" }));
     $("body").append(sheetconfigHTML());
 
-    $("#luckysheet-rows-h").width((Store.rowHeaderWidth-1.5));
+    $("#luckysheet-rows-h").width(Store.rowHeaderWidth-1.5);
     $("#luckysheet-cols-h-c").height((Store.columnHeaderHeight-1.5));
-    $("#luckysheet-left-top").css({width:Store.rowHeaderWidth-1.5, height:Store.columnHeaderHeight-1.5});
+    $("#luckysheet-left-top").css({
+        width: Store.rowHeaderWidth - 1.5, 
+        height: Store.columnHeaderHeight - 1.5
+    });
 
+    $("#luckysheet-cols-group").height(colsGroupAreaHeight);
+    $("#luckysheet-cols-group-btns").height(colsGroupAreaHeight);
+    
     // //批注
     // luckysheetPostil.buildAllPs(Store.flowdata);
+
+    $("#luckysheet-rows-group-btns").width(rowsGroupAreaWidth)
+    $("#luckysheet-rows-group").height(Store.cellmainHeight - Store.cellMainSrollBarSize);
 
     $("#luckysheet_info_detail_input").val(luckysheetConfigsetting.title);
 }

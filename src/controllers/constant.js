@@ -97,10 +97,15 @@ const gridHTML = function() {
                                 <table class="luckysheet-grid-window-2" cellspacing="0" cellpadding="0" dir="ltr" tabindex="-1" > 
                                     <tbody> 
                                         <tr> 
+                                            <td valign="top" class="luckysheet-paneswrapper">
+                                                <div class="luckysheet-rows-group-btns" id="luckysheet-rows-group-btns"></div>
+                                            </td>  
                                             <td valign="top" class="luckysheet-paneswrapper"> 
+                                                <div id="luckysheet-cols-group-btns"> </div> 
                                                 <div class="luckysheet-left-top" id="luckysheet-left-top"> </div> 
                                             </td> 
                                             <td valign="top" class="luckysheet-paneswrapper"> 
+                                                <div class="luckysheet-cols-group" id="luckysheet-cols-group"></div>
                                                 <div id="luckysheet-cols-h-c" class="luckysheet-cols-h-c">
                                                     <div class="luckysheet-cols-change-size" id="luckysheet-cols-change-size"></div>  
                                                     <div class="luckysheet-cols-menu-btn luckysheet-mousedown-cancel" id="luckysheet-cols-menu-btn"><i class="fa fa-caret-down luckysheet-mousedown-cancel" aria-hidden="true"></i></div>  
@@ -112,6 +117,9 @@ const gridHTML = function() {
                                             </td>
                                         </tr>
                                         <tr>
+                                            <td valign="top" class="luckysheet-paneswrapper">
+                                                <div class="luckysheet-rows-group" id="luckysheet-rows-group"></div>
+                                            </td>  
                                             <td valign="top" class="luckysheet-paneswrapper"> 
                                                 <div class="luckysheet-rows-h" id="luckysheet-rows-h"> 
                                                     <div class="luckysheet-rows-change-size" id="luckysheet-rows-change-size"></div> 
@@ -515,6 +523,13 @@ function rightclickHTML() {
                             }</span>
                         </div>
                     </div>
+
+                    <div id="luckysheet-row-col-group" class="luckysheet-cols-menuitem luckysheet-mousedown-cancel">
+                        <div class="luckysheet-cols-menuitem-content luckysheet-mousedown-cancel">
+                            创建组/取消组合
+                        </div>
+                    </div>
+
                     <div id="luckysheet-column-row-width-selected" class="luckysheet-cols-menuitem luckysheet-mousedown-cancel">
                         <div class="luckysheet-cols-menuitem-content luckysheet-mousedown-cancel">
                             <span class="luckysheet-cols-rows-shift-word luckysheet-mousedown-cancel">${
@@ -913,7 +928,7 @@ const pivottablesumHTML = function() {
 const sheetHTML =
         '<div style="${style}" id="luckysheet-sheets-item${index}" data-index="${index}" class="luckysheet-sheets-item ${active}"><span class="luckysheet-sheets-item-name" spellcheck ="false" contenteditable="false">${name}</span> <span class="luckysheet-sheets-item-menu luckysheet-mousedown-cancel"><i class="fa fa-sort-desc luckysheet-mousedown-cancel"></i></span>${colorset}</div>',
     columnHeaderHTML =
-        '<div class="luckysheet-cols-h-cells luckysheetsheetchange"  id="luckysheet-cols-h-cells_${index}" style="width:${width}px;"> <div class="luckysheet-cols-h-cells-c"> <div class="luckysheet-grdblkpush"></div>${column}</div></div>',
+        '<div class="luckysheet-cols-h-cells luckysheetsheetchange"  id="luckysheet-cols-h-cells_${index}" style="width:${width}px;"><div class="luckysheet-cols-h-cells-c"> <div class="luckysheet-grdblkpush"></div>${column}</div></div>',
     sheetselectlistHTML =
         '<div class="luckysheet-cols-menu luckysheet-rightgclick-menu luckysheet-mousedown-cancel" id="luckysheet-sheet-list">${item}</div>',
     sheetselectlistitemHTML =

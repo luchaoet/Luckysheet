@@ -7,7 +7,9 @@ import { computeRowlenArr } from './getRowlen';
 import { 
     luckysheetDrawMain, 
     luckysheetDrawgridRowTitle, 
-    luckysheetDrawgridColumnTitle 
+    luckysheetDrawgridColumnTitle,
+    luckysheetDrawgridRowGroup,
+    luckysheetDrawgridColumnGroup,
 } from './draw';
 import luckysheetFreezen from '../controllers/freezen';
 import server from '../controllers/server';
@@ -19,6 +21,8 @@ import { selectHightlightShow, selectionCopyShow, collaborativeEditBox } from '.
 import { createFilterOptions } from '../controllers/filter';
 import { getSheetIndex } from '../methods/get';
 import Store from '../store';
+import { getColsGroupAreaHeight, getGroup, getRowsGroupAreaWidth } from './group'
+import { changeSheetContainerSize } from '../controllers/resize';
 
 let refreshCanvasTimeOut = null;
 
@@ -893,7 +897,11 @@ function jfrefreshgrid_pastcut(source, target, RowlChange){
                 rowlen = Store.config["rowlen"][i];
             }
 
-            if (Store.config["rowhidden"] != null && Store.config["rowhidden"][i] != null) {
+            const { rowsGroup } = getGroup()
+            const isRowGroupClose = Object.values(rowsGroup).some(i => i.o === 0 && i.s <= r && i.e >= r)
+            const isRowHidden = Store.config["rowhidden"] != null && Store.config["rowhidden"][r] != null;
+
+            if (isRowGroupClose || isRowHidden) {
                 rowlen = Store.config["rowhidden"][i];
                 Store.visibledatarow.push(Store.rh_height);
                 continue;
@@ -1168,6 +1176,9 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
         scrollHeight = $("#luckysheet-cell-main").scrollTop();
     }
 
+    const rowsGroupAreaWidth = getRowsGroupAreaWidth()
+    const colsGroupAreaHeight = getColsGroupAreaHeight()
+
     if (luckysheetFreezen.freezenverticaldata != null || luckysheetFreezen.freezenhorizontaldata != null) {
         let freezen_horizon_px, freezen_horizon_ed, freezen_horizon_scrollTop;
         let freezen_vertical_px, freezen_vertical_ed, freezen_vertical_scrollTop;
@@ -1238,6 +1249,12 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
                 drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
                 freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth
             );
+            luckysheetDrawgridColumnGroup(freezen_vertical_scrollTop, freezen_vertical_px, Store.rowHeaderWidth);
+            luckysheetDrawgridColumnGroup(
+                scrollWidth + freezen_vertical_px - freezen_vertical_scrollTop, 
+                drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
+                freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth
+            );
             
             luckysheetDrawgridRowTitle(freezen_horizon_scrollTop, freezen_horizon_px, Store.columnHeaderHeight);
             luckysheetDrawgridRowTitle(
@@ -1245,7 +1262,12 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
                 drawHeight - freezen_horizon_px + freezen_horizon_scrollTop, 
                 freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight
             );
-           
+            luckysheetDrawgridRowGroup(freezen_horizon_scrollTop, freezen_horizon_px, Store.columnHeaderHeight);
+            luckysheetDrawgridRowGroup(
+                scrollHeight + freezen_horizon_px - freezen_horizon_scrollTop, 
+                drawHeight - freezen_horizon_px + freezen_horizon_scrollTop, 
+                freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight
+            );
         }
         else if (luckysheetFreezen.freezenhorizontaldata != null) {
             freezen_horizon_px = luckysheetFreezen.freezenhorizontaldata[0];
@@ -1273,6 +1295,7 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
             );
         
             luckysheetDrawgridColumnTitle(scrollWidth, drawWidth, null);
+            luckysheetDrawgridColumnGroup(scrollWidth, drawWidth, null);
             
             luckysheetDrawgridRowTitle(freezen_horizon_scrollTop, freezen_horizon_px, Store.columnHeaderHeight);
             luckysheetDrawgridRowTitle(
@@ -1280,7 +1303,12 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
                 drawHeight - freezen_horizon_px + freezen_horizon_scrollTop, 
                 freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight
             );
-            
+            luckysheetDrawgridRowGroup(freezen_horizon_scrollTop, freezen_horizon_px, Store.columnHeaderHeight);
+            luckysheetDrawgridRowGroup(
+                scrollHeight + freezen_horizon_px - freezen_horizon_scrollTop, 
+                drawHeight - freezen_horizon_px + freezen_horizon_scrollTop, 
+                freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight
+            );
         }
         else if (luckysheetFreezen.freezenverticaldata != null) {
             freezen_vertical_px = luckysheetFreezen.freezenverticaldata[0];
@@ -1308,6 +1336,13 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
             );
             
             luckysheetDrawgridRowTitle(scrollHeight, drawHeight, null);
+
+            luckysheetDrawgridRowGroup(scrollHeight, drawHeight, null);
+            // luckysheetDrawgridRowGroup(
+            //     scrollWidth + freezen_vertical_px - freezen_vertical_scrollTop, 
+            //     drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
+            //     freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth
+            // );
             
             luckysheetDrawgridColumnTitle(freezen_vertical_scrollTop, freezen_vertical_px, Store.rowHeaderWidth);
             luckysheetDrawgridColumnTitle(
@@ -1315,7 +1350,12 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
                 drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
                 freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth
             );
-            
+            luckysheetDrawgridColumnGroup(freezen_vertical_scrollTop, freezen_vertical_px, Store.rowHeaderWidth);
+            luckysheetDrawgridColumnGroup(
+                scrollWidth + freezen_vertical_px - freezen_vertical_scrollTop, 
+                drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
+                freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth
+            );
         }
     }
     else {
@@ -1323,17 +1363,28 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
             return;
         }
         let luckysheetTableContent = $("#luckysheetTableContent").get(0).getContext("2d");
+
         luckysheetDrawMain(scrollWidth, scrollHeight);
-    
-        // luckysheetTableContent.clearRect(0, 0, 46, 20);
-        
         luckysheetDrawgridColumnTitle(scrollWidth);
         luckysheetDrawgridRowTitle(scrollHeight);
 
-        //清除canvas左上角区域 防止列标题栏序列号溢出显示
+        luckysheetDrawgridColumnGroup(scrollWidth);
+        luckysheetDrawgridRowGroup(scrollHeight);
         
-        luckysheetTableContent.clearRect(0, 0, (Store.rowHeaderWidth* Store.devicePixelRatio-1) , (Store.columnHeaderHeight* Store.devicePixelRatio-1) );
+
+        //清除canvas左上角区域 防止列标题栏序列号溢出显示
+        luckysheetTableContent.clearRect(0, 0, ((Store.rowHeaderWidth + rowsGroupAreaWidth) * Store.devicePixelRatio-1) , ((Store.columnHeaderHeight + colsGroupAreaHeight) * Store.devicePixelRatio-2) );
     }
+    
+    // 更新单元格区域宽高
+    const gridW = $("#" + Store.container).width();
+    const gridH = $("#" + Store.container).height();
+    Store.cellmainHeight = gridH - (Store.infobarHeight + Store.toolbarHeight + Store.calculatebarHeight + Store.columnHeaderHeight + Store.sheetBarHeight + Store.statisticBarHeight + colsGroupAreaHeight);
+    Store.cellmainWidth = gridW - Store.rowHeaderWidth - rowsGroupAreaWidth;
+    // 滚动条更新
+    $("#luckysheet-scrollbar-x").width(Store.cellmainWidth).css("left", rowsGroupAreaWidth + Store.rowHeaderWidth - 2);
+    $("#luckysheet-scrollbar-y").height(Store.cellmainHeight + Store.columnHeaderHeight - Store.cellMainSrollBarSize - 3)
+    $("#luckysheet-scrollbar-y").css('top', colsGroupAreaHeight);
 }
 
 export {

@@ -1303,7 +1303,37 @@ div.luckysheet-sheets-m:hover {
     overflow: hidden;
     height: 1px;
 }
+#luckysheet-rows-group-btns {
+    align-items: end;
+    display: flex;
+    justify-content: center;
+    height: 100%;
+}
+#luckysheet-rows-group-btns div {
+    padding: 0 2px;
+    cursor: pointer;
+    border: 1px solid #eee;
+    line-height: 1;
+}
+#luckysheet-rows-group-btns div + div {
+    border-left-width: 0;
+}
 
+#luckysheet-cols-group-btns {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: end;
+}
+#luckysheet-cols-group-btns div {
+    padding: 0 2px;
+    cursor: pointer;
+    border: 1px solid #eee;
+    line-height: 1;
+}
+#luckysheet-cols-group-btns div + div {
+    border-top-width: 0;
+}
 .luckysheet-left-top {
     width: 44.5px;
     height: 18.5px;
@@ -1314,6 +1344,7 @@ div.luckysheet-sheets-m:hover {
     margin: -1px 0 0 -1px;
     padding-left: 0;
     cursor: pointer;
+    z-index: 2;
 }
 
 .luckysheet-cols-h-c {
@@ -1402,7 +1433,9 @@ div.luckysheet-sheets-m:hover {
     height: inherit;
     /*width: 4721px;*/
 }
-
+.luckysheet-cols-group {
+    width: 5000000px
+}
 .luckysheet-cols-h-cells-c {
     color: #5e5e5e;
     cursor: default;
@@ -1509,7 +1542,8 @@ body:not(.ewa-ipad) .luckysheet-rows-h-cell-sel:hover {
     z-index: 11;
     border: 0 none;
     right: 0;
-    width: 100%;
+    /* width: 100%; */
+    width: 50px;
     margin-top: 2px;
     display: none;
     /*transition: all 0.1s;*/
@@ -1521,7 +1555,9 @@ body:not(.ewa-ipad) .luckysheet-rows-h-cell-sel:hover {
     z-index: 10;
     border-right: 1px solid #0188fb;
     right: 0;
-    width: 100%;
+    /* width: 100%; */
+    width: (100% - 50px);
+    box-sizing: border-box;
     margin-top: 2px;
     display: none;
     transition: all 0.1s;
@@ -2967,6 +3003,7 @@ fieldset[disabled] .btn-danger.focus {
 
 .luckysheet-rows-change-size {
     width: 100%;
+    right: 0;
     height: 5px;
     background: #0188fb;
     cursor: ns-resize;

@@ -1,6 +1,7 @@
 import Store from '../store';
 import { computeRowlenByContent,computeColWidthByContent } from './getRowlen';
 import luckysheetConfigsetting from '../controllers/luckysheetConfigsetting';
+import { getGroup, getRowsGroupAreaWidth, getColsGroupAreaHeight } from './group'
 
 export default function rhchInit(rowheight, colwidth) {
     zoomSetting();//Zoom sheet on first load
@@ -16,7 +17,11 @@ export default function rhchInit(rowheight, colwidth) {
                 rowlen = Store.config["rowlen"][r];
             }
 
-            if (Store.config["rowhidden"] != null && Store.config["rowhidden"][r] != null) {
+            const { rowsGroup } = getGroup()
+            const isRowGroupClose = Object.values(rowsGroup).some(i => i.o === 0 && i.s <= r && i.e >= r)
+            const isRowHidden = Store.config["rowhidden"] != null && Store.config["rowhidden"][r] != null;
+
+            if (isRowGroupClose || isRowHidden) {
                 Store.visibledatarow.push(Store.rh_height);
                 continue;
             }
@@ -36,7 +41,6 @@ export default function rhchInit(rowheight, colwidth) {
         } else {
             Store.rh_height += 80;  //最底部增加空白
         }
-
     }
 
     //列宽
@@ -71,7 +75,11 @@ export default function rhchInit(rowheight, colwidth) {
                 }
             }
 
-            if(Store.config["colhidden"] != null && Store.config["colhidden"][c] != null){
+            const colsGroup = Store.config.colsGroup || {};
+            const isRowGroupClose = Object.values(colsGroup).some(i => i.o === 0 && i.s <= c && i.e >= c)
+            const isRowHidden = Store.config["colhidden"] != null && Store.config["colhidden"][c] != null;
+
+            if(isRowGroupClose || isRowHidden){
                 Store.visibledatacolumn.push(Store.ch_width);
                 continue;
             }
@@ -99,7 +107,13 @@ export function zoomSetting(){
     //zoom
     Store.rowHeaderWidth = luckysheetConfigsetting.rowHeaderWidth * Store.zoomRatio;
     Store.columnHeaderHeight = luckysheetConfigsetting.columnHeaderHeight *Store.zoomRatio;
-    $("#luckysheet-rows-h").width((Store.rowHeaderWidth-1.5));
+    $("#luckysheet-rows-h").width(Store.rowHeaderWidth-1.5);
     $("#luckysheet-cols-h-c").height((Store.columnHeaderHeight-1.5));
     $("#luckysheet-left-top").css({width:Store.rowHeaderWidth-1.5, height:Store.columnHeaderHeight-1.5});
+
+    const colsGroupAreaHeight = getColsGroupAreaHeight()
+    const rowsGroupAreaWidth = getRowsGroupAreaWidth()
+    $("#luckysheet-cols-group").height(colsGroupAreaHeight);
+    $("#luckysheet-cols-group-btns").height(colsGroupAreaHeight);
+    $("#luckysheet-rows-group-btns").width(rowsGroupAreaWidth)
 }

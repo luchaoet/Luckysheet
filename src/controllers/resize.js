@@ -7,6 +7,7 @@ import sheetmanage from './sheetmanage';
 import tooltip from '../global/tooltip'
 import { $$, getObjType, camel2split } from "../utils/util";
 import { defaultToolbar, toolbarIdMap } from './toolbar';
+import { getColsGroupAreaHeight, getRowsGroupAreaWidth } from '../global/group';
 
 let gridW = 0,
     gridH = 0;
@@ -274,22 +275,35 @@ export function changeSheetContainerSize(gridW, gridH){
     if(gridH==null){
         gridH = $("#" + Store.container).height();
     }
-    Store.cellmainHeight = gridH - (Store.infobarHeight + Store.toolbarHeight + Store.calculatebarHeight + Store.columnHeaderHeight + Store.sheetBarHeight + Store.statisticBarHeight);
-    Store.cellmainWidth = gridW - Store.rowHeaderWidth;
 
-    $("#luckysheet-cols-h-c, #luckysheet-cell-main").width(Store.cellmainWidth);
+    const colsGroupAreaHeight = getColsGroupAreaHeight()
+    const rowsGroupAreaWidth = getRowsGroupAreaWidth();
+
+    Store.cellmainHeight = gridH - (Store.infobarHeight + Store.toolbarHeight + Store.calculatebarHeight + Store.columnHeaderHeight + Store.sheetBarHeight + Store.statisticBarHeight + colsGroupAreaHeight);
+    Store.cellmainWidth = gridW - Store.rowHeaderWidth - rowsGroupAreaWidth;
+
+    $("#luckysheet-cols-h-c, #luckysheet-cell-main, #luckysheet-cols-group").width(Store.cellmainWidth);
     $("#luckysheet-cell-main").height(Store.cellmainHeight);
     $("#luckysheet-rows-h").height(Store.cellmainHeight - Store.cellMainSrollBarSize);
 
-    $("#luckysheet-scrollbar-y").height(Store.cellmainHeight + Store.columnHeaderHeight - Store.cellMainSrollBarSize - 3);
-    $("#luckysheet-scrollbar-x").height(Store.cellMainSrollBarSize);
-    $("#luckysheet-scrollbar-y").width(Store.cellMainSrollBarSize);
+    
+    $("#luckysheet-cols-group").height(colsGroupAreaHeight);
+    $("#luckysheet-cols-group-btns").height(colsGroupAreaHeight);
 
-    $("#luckysheet-scrollbar-x").width(Store.cellmainWidth).css("left", Store.rowHeaderWidth - 2);
+    $("#luckysheet-rows-group-btns").width(rowsGroupAreaWidth)
+    $("#luckysheet-rows-group").height(Store.cellmainHeight - Store.cellMainSrollBarSize);
+
+    $("#luckysheet-scrollbar-y").height(Store.cellmainHeight + Store.columnHeaderHeight - Store.cellMainSrollBarSize - 3)
+    $("#luckysheet-scrollbar-y").width(Store.cellMainSrollBarSize);
+    $("#luckysheet-scrollbar-y").css('top', colsGroupAreaHeight);
+
+    $("#luckysheet-scrollbar-x").height(Store.cellMainSrollBarSize);
+    $("#luckysheet-scrollbar-x").width(Store.cellmainWidth).css("left", rowsGroupAreaWidth + Store.rowHeaderWidth - 2);
+
 
     Store.luckysheetTableContentHW = [
-        Store.cellmainWidth + Store.rowHeaderWidth - Store.cellMainSrollBarSize,
-        Store.cellmainHeight + Store.columnHeaderHeight - Store.cellMainSrollBarSize
+        Store.cellmainWidth + Store.rowHeaderWidth + rowsGroupAreaWidth - Store.cellMainSrollBarSize,
+        Store.cellmainHeight + Store.columnHeaderHeight + colsGroupAreaHeight - Store.cellMainSrollBarSize
     ];
 
     $("#luckysheetTableContent, #luckysheetTableContentF").attr({

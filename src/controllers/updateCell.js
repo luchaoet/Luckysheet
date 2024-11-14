@@ -17,6 +17,7 @@ import {isInlineStringCell} from './inlineString';
 import Store from '../store';
 import server from './server';
 import method from '../global/method';
+import { getColsGroupAreaHeight, getRowsGroupAreaWidth } from '../global/group';
 
 export function luckysheetupdateCell(row_index1, col_index1, d, cover, isnotfocus) {
     if(!checkProtectionLocked(row_index1, col_index1, Store.currentSheetIndex)){
@@ -66,14 +67,17 @@ export function luckysheetupdateCell(row_index1, col_index1, d, cover, isnotfocu
         return;
     }
 
-    let left = col_pre + container_offset.left + Store.rowHeaderWidth - scrollLeft - 2;
+    const rowsGroupAreaWidth = getRowsGroupAreaWidth()
+    const colsGroupAreaHeight = getColsGroupAreaHeight()
+
+    let left = col_pre + container_offset.left + Store.rowHeaderWidth + rowsGroupAreaWidth - scrollLeft - 2;
     if(luckysheetFreezen.freezenverticaldata != null && col_index1 <= luckysheetFreezen.freezenverticaldata[1]){
-        left = col_pre + container_offset.left + Store.rowHeaderWidth - 2;
+        left = col_pre + container_offset.left + Store.rowHeaderWidth + rowsGroupAreaWidth - 2;
     }
 
-    let top = row_pre + container_offset.top + Store.infobarHeight + Store.toolbarHeight + Store.calculatebarHeight + Store.columnHeaderHeight - scrollTop - 2;
+    let top = row_pre + container_offset.top + Store.infobarHeight + Store.toolbarHeight + Store.calculatebarHeight + Store.columnHeaderHeight + colsGroupAreaHeight - scrollTop - 2;
     if(luckysheetFreezen.freezenhorizontaldata != null && row_index1 <= luckysheetFreezen.freezenhorizontaldata[1]){
-        top = row_pre + container_offset.top + Store.infobarHeight + Store.toolbarHeight + Store.calculatebarHeight + Store.columnHeaderHeight - 2;
+        top = row_pre + container_offset.top + Store.infobarHeight + Store.toolbarHeight + Store.calculatebarHeight + Store.columnHeaderHeight + colsGroupAreaHeight - 2;
     }
 
     let input_postition = {
@@ -116,7 +120,7 @@ export function luckysheetupdateCell(row_index1, col_index1, d, cover, isnotfocu
     $("#luckysheet-wa-functionbox-cancel, #luckysheet-wa-functionbox-confirm").addClass("luckysheet-wa-calculate-active");
     
     let value = "", isCenter=false;
-    
+
     if (d[row_index] != null && d[row_index][col_index] != null) {
         let cell = d[row_index][col_index];
         let htValue = cell["ht"];
