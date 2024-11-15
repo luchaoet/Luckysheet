@@ -82,3 +82,11 @@ export function toggleState(type, index) {
     updateGroup(type, `${s}_${e}`, o === 0 ? 1 : 0)
   }
 }
+
+export function getGroupConfig() {
+  const { group } = Store.toJsonOptions || {};
+  return {
+    lineWidth: group.lineWidth || 2,
+    strokeStyle: group.strokeStyle || '#bcbdbc',
+  }
+}

@@ -19,7 +19,7 @@ import method from "./method";
 import Store from "../store";
 import locale from "../locale/locale";
 import sheetmanage from "../controllers/sheetmanage";
-import { getGroup, getRowsGroupAreaWidth, getColsGroupAreaHeight } from './group'
+import { getGroup, getRowsGroupAreaWidth, getColsGroupAreaHeight, getGroupConfig } from './group'
 
 function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
     if (scrollHeight == null) {
@@ -66,6 +66,9 @@ function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
 
     let bodrder05 = 0.5;
     $("#luckysheet-rows-group-btns").empty()
+
+    const { lineWidth, strokeStyle } = getGroupConfig();
+     
     for (let i = 0; i < group.length; i++) {
         const {s, e} = group[i];
         // 收起/打开按钮
@@ -86,19 +89,28 @@ function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
         luckysheetTableContent.lineTo(bodrder05 + 10 + i * 10, startPos);
         luckysheetTableContent.lineTo(bodrder05 + 10 + i * 10, endPos);
         luckysheetTableContent.lineTo(bodrder05 + 15 + i * 10, endPos);
-        luckysheetTableContent.lineWidth = 2;
-        luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.fillStyle;
+        luckysheetTableContent.lineWidth = lineWidth;
+        luckysheetTableContent.strokeStyle = strokeStyle;
         luckysheetTableContent.stroke();
         luckysheetTableContent.closePath();
         
         // 大括号内的点
         for (let j = s; j <= e; j++) {
+            // 忽略隐藏或分组收起的列
+            const rowHidden = Store.config.rowhidden || {};
+            const isHidden = rowHidden[j] != null;
+            const isClose = group.some(g => g.s <= j && g.e >= j && g.o === 0)
+            // 这个点在下一个线条上，也不绘制
+            const inNextLine = i < group.length - 1 && group[i + 1].s <= j && group[i + 1].e >= j;
+
+            if( isHidden || isClose || inNextLine) continue
+            
             const rowlen = Store.config.rowlen[j] || 20;
             const pos = colsGroupAreaHeight + Store.visibledatarow[j] - scrollHeight - rowlen / 2 + offsetTop;
 
             luckysheetTableContent.beginPath();
+            luckysheetTableContent.fillStyle = strokeStyle;
             luckysheetTableContent.arc(bodrder05 + 10 + (i+1) * 10, pos, 1, 0, 2 * Math.PI);
-            luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.fillStyle;
             luckysheetTableContent.fill();
             luckysheetTableContent.closePath();
         }
@@ -156,6 +168,9 @@ function luckysheetDrawgridColumnGroup(scrollWidth, drawWidth, offsetLeft) {
 
     let bodrder05 = 0.5;
     $("#luckysheet-cols-group-btns").empty()
+
+    const { lineWidth, strokeStyle } = getGroupConfig();
+
     for (let i = 0; i < group.length; i++) {
         const {s, e} = group[i];
         // 收起/打开按钮
@@ -175,21 +190,26 @@ function luckysheetDrawgridColumnGroup(scrollWidth, drawWidth, offsetLeft) {
         luckysheetTableContent.lineTo(bodrder05 + startPos, 10 + i * 10);
         luckysheetTableContent.lineTo(bodrder05 + endPos, 10 + i * 10);
         luckysheetTableContent.lineTo(bodrder05 + endPos, 15 + i * 10);
-        luckysheetTableContent.lineWidth = 2;
-        // luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.fillStyle;
+        luckysheetTableContent.lineWidth = lineWidth;
+        luckysheetTableContent.strokeStyle = strokeStyle;
         luckysheetTableContent.stroke();
         luckysheetTableContent.closePath();
         // 大括号内的点
         for (let j = s; j <= e; j++) {
             // 忽略隐藏或分组收起的列
-            const rowHidden = Store.config.colhidden || {};
+            const colHidden = Store.config.colhidden || {};
+            const isHidden = colHidden[j] != null;
             const isClose = group.some(g => g.s <= j && g.e >= j && g.o === 0)
-            if(rowHidden[j] != null || isClose) continue
+            // 这个点在下一个线条上，也不绘制
+            const inNextLine = i < group.length - 1 && group[i + 1].s <= j && group[i + 1].e >= j;
+
+            if( isHidden || isClose || inNextLine) continue
 
             const columnlen = Store.config.columnlen[j] || 73;
             const pos = rowsGroupAreaWidth + Store.visibledatacolumn[j] - scrollWidth - columnlen / 2 + offsetLeft;
 
             luckysheetTableContent.beginPath();
+            luckysheetTableContent.fillStyle = strokeStyle;
             luckysheetTableContent.arc(pos, 10 + (i+1) * 10, 1, 0, 2 * Math.PI);
             luckysheetTableContent.fill();
             // luckysheetTableContent.closePath();
