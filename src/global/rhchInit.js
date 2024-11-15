@@ -104,7 +104,7 @@ export default function rhchInit(rowheight, colwidth) {
 
 
 export function zoomSetting(){
-    //zoom
+    // zoom
     Store.rowHeaderWidth = luckysheetConfigsetting.rowHeaderWidth * Store.zoomRatio;
     Store.columnHeaderHeight = luckysheetConfigsetting.columnHeaderHeight *Store.zoomRatio;
     $("#luckysheet-rows-h").width(Store.rowHeaderWidth-1.5);
@@ -115,5 +115,6 @@ export function zoomSetting(){
     const rowsGroupAreaWidth = getRowsGroupAreaWidth()
     $("#luckysheet-cols-group").height(colsGroupAreaHeight);
     $("#luckysheet-cols-group-btns").height(colsGroupAreaHeight);
-    $("#luckysheet-rows-group-btns").width(rowsGroupAreaWidth)
+    $("#luckysheet-rows-group-btns").width(rowsGroupAreaWidth);
+
 }

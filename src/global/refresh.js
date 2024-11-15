@@ -1249,11 +1249,11 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
                 drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
                 freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth
             );
-            luckysheetDrawgridColumnGroup(freezen_vertical_scrollTop + colsGroupAreaHeight, freezen_vertical_px, Store.rowHeaderWidth + colsGroupAreaHeight);
+            luckysheetDrawgridColumnGroup(freezen_vertical_scrollTop + rowsGroupAreaWidth, freezen_vertical_px, Store.rowHeaderWidth + rowsGroupAreaWidth);
             luckysheetDrawgridColumnGroup(
-                scrollWidth + freezen_vertical_px - freezen_vertical_scrollTop + colsGroupAreaHeight, 
+                scrollWidth + freezen_vertical_px - freezen_vertical_scrollTop + rowsGroupAreaWidth, 
                 drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
-                freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth + colsGroupAreaHeight
+                freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth + rowsGroupAreaWidth
             );
             
             luckysheetDrawgridRowTitle(freezen_horizon_scrollTop, freezen_horizon_px, Store.columnHeaderHeight);
@@ -1344,11 +1344,11 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
                 drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
                 freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth
             );
-            luckysheetDrawgridColumnGroup(freezen_vertical_scrollTop + colsGroupAreaHeight, freezen_vertical_px, Store.rowHeaderWidth + colsGroupAreaHeight);
+            luckysheetDrawgridColumnGroup(freezen_vertical_scrollTop + colsGroupAreaHeight, freezen_vertical_px, Store.rowHeaderWidth + rowsGroupAreaWidth);
             luckysheetDrawgridColumnGroup(
                 scrollWidth + freezen_vertical_px - freezen_vertical_scrollTop + colsGroupAreaHeight, 
                 drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
-                freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth + colsGroupAreaHeight
+                freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth + rowsGroupAreaWidth
             );
         }
     }

@@ -1603,6 +1603,9 @@ window.sheetCell = {
     ],
     "scrollLeft": 0,
     "scrollTop": 0,
-    "frozen": {"type":"row"}
+    "frozen": {
+        type: 'rangeBoth',
+        range: {row_focus: 2, column_focus: 2}
+     }
 }
 // export default sheetCell

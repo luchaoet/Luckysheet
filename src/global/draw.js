@@ -100,7 +100,7 @@ function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
             luckysheetTableContent.arc(bodrder05 + 10 + (i+1) * 10, pos, 1, 0, 2 * Math.PI);
             luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.fillStyle;
             luckysheetTableContent.fill();
-            // luckysheetTableContent.closePath();
+            luckysheetTableContent.closePath();
         }
         luckysheetTableContent.restore();
         
@@ -222,7 +222,7 @@ function luckysheetDrawgridRowTitle(scrollHeight, drawHeight, offsetTop) {
         .getContext("2d");
     luckysheetTableContent.save();
     luckysheetTableContent.scale(Store.devicePixelRatio, Store.devicePixelRatio);
-    luckysheetTableContent.clearRect(0, offsetTop, Store.rowHeaderWidth - 1 + rowsGroupAreaWidth, drawHeight);
+    luckysheetTableContent.clearRect(0, offsetTop + colsGroupAreaHeight, Store.rowHeaderWidth - 1 + rowsGroupAreaWidth, drawHeight);
 
     luckysheetTableContent.font = luckysheetdefaultFont();
     luckysheetTableContent.textBaseline = luckysheetdefaultstyle.textBaseline; //基准线 垂直居中
@@ -241,8 +241,9 @@ function luckysheetDrawgridRowTitle(scrollHeight, drawHeight, offsetTop) {
 
     luckysheetTableContent.save();
     luckysheetTableContent.beginPath();
-    luckysheetTableContent.rect(rowsGroupAreaWidth, offsetTop - 1, Store.rowHeaderWidth - 1, drawHeight - 2);
+    luckysheetTableContent.rect(rowsGroupAreaWidth, offsetTop - 1 + colsGroupAreaHeight, Store.rowHeaderWidth - 1, drawHeight - 2);
     luckysheetTableContent.clip();
+    luckysheetTableContent.closePath();
 
     let end_r, start_r;
     let bodrder05 = 0.5; //Default 0.5
@@ -345,8 +346,6 @@ function luckysheetDrawgridRowTitle(scrollHeight, drawHeight, offsetTop) {
             luckysheetTableContent.beginPath(); 
             luckysheetTableContent.moveTo(rowsGroupAreaWidth,  end_r + offsetTop - 4 + bodrder05);
             luckysheetTableContent.lineTo(rowsGroupAreaWidth + Store.rowHeaderWidth, end_r + offsetTop - 4 + bodrder05);
-            // luckysheetTableContent.lineWidth = 1;
-            // luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.strokeStyle;
             luckysheetTableContent.closePath();
             luckysheetTableContent.stroke();
         } else if (
@@ -357,9 +356,6 @@ function luckysheetDrawgridRowTitle(scrollHeight, drawHeight, offsetTop) {
             luckysheetTableContent.beginPath();
             luckysheetTableContent.moveTo(rowsGroupAreaWidth - 5, end_r + offsetTop - 2 + bodrder05);
             luckysheetTableContent.lineTo(rowsGroupAreaWidth + Store.rowHeaderWidth - 1, end_r + offsetTop - 2 + bodrder05);
-
-            // luckysheetTableContent.lineWidth = 1;
-            // luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.strokeStyle;
             luckysheetTableContent.closePath();
             luckysheetTableContent.stroke();
         }
@@ -437,7 +433,7 @@ function luckysheetDrawgridColumnTitle(scrollWidth, drawWidth, offsetLeft) {
         .getContext("2d");
     luckysheetTableContent.save();
     luckysheetTableContent.scale(Store.devicePixelRatio, Store.devicePixelRatio);
-    luckysheetTableContent.clearRect(offsetLeft, 0, drawWidth, Store.columnHeaderHeight + colsGroupAreaHeight - 1);
+    // luckysheetTableContent.clearRect(offsetLeft, 0, drawWidth, Store.columnHeaderHeight + colsGroupAreaHeight - 1);
 
     luckysheetTableContent.font = luckysheetdefaultFont();
     luckysheetTableContent.textBaseline = luckysheetdefaultstyle.textBaseline; //基准线 垂直居中
@@ -456,8 +452,9 @@ function luckysheetDrawgridColumnTitle(scrollWidth, drawWidth, offsetLeft) {
 
     luckysheetTableContent.save();
     luckysheetTableContent.beginPath();
-    luckysheetTableContent.rect(offsetLeft - 1, 0, drawWidth, Store.columnHeaderHeight + colsGroupAreaHeight - 1);
+    luckysheetTableContent.rect(offsetLeft - 1 + rowsGroupAreaWidth, rowsGroupAreaWidth, drawWidth, Store.columnHeaderHeight + colsGroupAreaHeight - 1);
     luckysheetTableContent.clip();
+    luckysheetTableContent.closePath()
 
     let end_c, start_c;
     let bodrder05 = 0.5; //Default 0.5
