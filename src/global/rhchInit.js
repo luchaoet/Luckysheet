@@ -117,4 +117,14 @@ export function zoomSetting(){
     $("#luckysheet-cols-group-btns").height(colsGroupAreaHeight);
     $("#luckysheet-rows-group-btns").width(rowsGroupAreaWidth);
 
+    setTimeout(() => {
+        const zoomRatio = Store.zoomRatio.toFixed(1)
+        $("#luckysheet-cols-group-btns > div").each(function() {
+            $(this).css({
+                "transform": `scale(${zoomRatio})`,
+                "transform-origin": "right top"
+            })
+        })
+    }, 5);
+
 }
