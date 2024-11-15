@@ -898,8 +898,8 @@ function jfrefreshgrid_pastcut(source, target, RowlChange){
             }
 
             const { rowsGroup } = getGroup()
-            const isRowGroupClose = Object.values(rowsGroup).some(i => i.o === 0 && i.s <= r && i.e >= r)
-            const isRowHidden = Store.config["rowhidden"] != null && Store.config["rowhidden"][r] != null;
+            const isRowGroupClose = Object.values(rowsGroup).some(k => k.o === 0 && k.s <= i && k.e >= i)
+            const isRowHidden = Store.config["rowhidden"] != null && Store.config["rowhidden"][i] != null;
 
             if (isRowGroupClose || isRowHidden) {
                 rowlen = Store.config["rowhidden"][i];
@@ -1249,11 +1249,11 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
                 drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
                 freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth
             );
-            luckysheetDrawgridColumnGroup(freezen_vertical_scrollTop, freezen_vertical_px, Store.rowHeaderWidth);
+            luckysheetDrawgridColumnGroup(freezen_vertical_scrollTop + colsGroupAreaHeight, freezen_vertical_px, Store.rowHeaderWidth + colsGroupAreaHeight);
             luckysheetDrawgridColumnGroup(
-                scrollWidth + freezen_vertical_px - freezen_vertical_scrollTop, 
+                scrollWidth + freezen_vertical_px - freezen_vertical_scrollTop + colsGroupAreaHeight, 
                 drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
-                freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth
+                freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth + colsGroupAreaHeight
             );
             
             luckysheetDrawgridRowTitle(freezen_horizon_scrollTop, freezen_horizon_px, Store.columnHeaderHeight);
@@ -1262,11 +1262,11 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
                 drawHeight - freezen_horizon_px + freezen_horizon_scrollTop, 
                 freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight
             );
-            luckysheetDrawgridRowGroup(freezen_horizon_scrollTop, freezen_horizon_px, Store.columnHeaderHeight);
+            luckysheetDrawgridRowGroup(freezen_horizon_scrollTop + colsGroupAreaHeight, freezen_horizon_px, Store.columnHeaderHeight + colsGroupAreaHeight);
             luckysheetDrawgridRowGroup(
-                scrollHeight + freezen_horizon_px - freezen_horizon_scrollTop, 
+                scrollHeight + freezen_horizon_px - freezen_horizon_scrollTop + colsGroupAreaHeight, 
                 drawHeight - freezen_horizon_px + freezen_horizon_scrollTop, 
-                freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight
+                freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight + colsGroupAreaHeight
             );
         }
         else if (luckysheetFreezen.freezenhorizontaldata != null) {
@@ -1297,18 +1297,17 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
         
             luckysheetDrawgridColumnTitle(scrollWidth, drawWidth, null);
             luckysheetDrawgridColumnGroup(scrollWidth, drawWidth, null);
-            
             luckysheetDrawgridRowTitle(freezen_horizon_scrollTop, freezen_horizon_px, Store.columnHeaderHeight);
             luckysheetDrawgridRowTitle(
                 scrollHeight + freezen_horizon_px - freezen_horizon_scrollTop, 
                 drawHeight - freezen_horizon_px + freezen_horizon_scrollTop, 
                 freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight
             );
-            luckysheetDrawgridRowGroup(freezen_horizon_scrollTop, freezen_horizon_px, Store.columnHeaderHeight);
+            luckysheetDrawgridRowGroup(freezen_horizon_scrollTop + colsGroupAreaHeight, freezen_horizon_px, Store.columnHeaderHeight + colsGroupAreaHeight);
             luckysheetDrawgridRowGroup(
-                scrollHeight + freezen_horizon_px - freezen_horizon_scrollTop, 
+                scrollHeight + freezen_horizon_px - freezen_horizon_scrollTop + colsGroupAreaHeight, 
                 drawHeight - freezen_horizon_px + freezen_horizon_scrollTop, 
-                freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight
+                freezen_horizon_px - freezen_horizon_scrollTop + Store.columnHeaderHeight + colsGroupAreaHeight
             );
         }
         else if (luckysheetFreezen.freezenverticaldata != null) {
@@ -1345,11 +1344,11 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
                 drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
                 freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth
             );
-            luckysheetDrawgridColumnGroup(freezen_vertical_scrollTop, freezen_vertical_px, Store.rowHeaderWidth);
+            luckysheetDrawgridColumnGroup(freezen_vertical_scrollTop + colsGroupAreaHeight, freezen_vertical_px, Store.rowHeaderWidth + colsGroupAreaHeight);
             luckysheetDrawgridColumnGroup(
-                scrollWidth + freezen_vertical_px - freezen_vertical_scrollTop, 
+                scrollWidth + freezen_vertical_px - freezen_vertical_scrollTop + colsGroupAreaHeight, 
                 drawWidth - freezen_vertical_px + freezen_vertical_scrollTop, 
-                freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth
+                freezen_vertical_px - freezen_vertical_scrollTop + Store.rowHeaderWidth + colsGroupAreaHeight
             );
         }
     }

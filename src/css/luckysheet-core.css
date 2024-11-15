@@ -1542,8 +1542,7 @@ body:not(.ewa-ipad) .luckysheet-rows-h-cell-sel:hover {
     z-index: 11;
     border: 0 none;
     right: 0;
-    /* width: 100%; */
-    width: 50px;
+    width: 100%;
     margin-top: 2px;
     display: none;
     /*transition: all 0.1s;*/
@@ -1555,9 +1554,7 @@ body:not(.ewa-ipad) .luckysheet-rows-h-cell-sel:hover {
     z-index: 10;
     border-right: 1px solid #0188fb;
     right: 0;
-    /* width: 100%; */
-    width: (100% - 50px);
-    box-sizing: border-box;
+    width: 100%;
     margin-top: 2px;
     display: none;
     transition: all 0.1s;
@@ -3003,7 +3000,6 @@ fieldset[disabled] .btn-danger.focus {
 
 .luckysheet-rows-change-size {
     width: 100%;
-    right: 0;
     height: 5px;
     background: #0188fb;
     cursor: ns-resize;

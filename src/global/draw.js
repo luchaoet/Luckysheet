@@ -77,6 +77,7 @@ function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
         const rowlen = Store.config.rowlen[s] || 20;
         const startPos = colsGroupAreaHeight + Store.visibledatarow[s] - scrollHeight - rowlen + offsetTop - 1;
         const endPos = colsGroupAreaHeight + Store.visibledatarow[e] - scrollHeight + offsetTop - 2;
+
         // 大括号
         luckysheetTableContent.save();
         // luckysheetTableContent.scale(Store.zoomRatio, Store.zoomRatio);
@@ -89,16 +90,17 @@ function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
         luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.fillStyle;
         luckysheetTableContent.stroke();
         luckysheetTableContent.closePath();
+        
         // 大括号内的点
         for (let j = s; j <= e; j++) {
             const rowlen = Store.config.rowlen[j] || 20;
             const pos = colsGroupAreaHeight + Store.visibledatarow[j] - scrollHeight - rowlen / 2 + offsetTop;
 
             luckysheetTableContent.beginPath();
-            luckysheetTableContent.arc(bodrder05 + 10 + (i+1) * 10, pos, 0.1, 0, 2 * Math.PI);
+            luckysheetTableContent.arc(bodrder05 + 10 + (i+1) * 10, pos, 1, 0, 2 * Math.PI);
             luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.fillStyle;
-            luckysheetTableContent.stroke();
-            luckysheetTableContent.closePath();
+            luckysheetTableContent.fill();
+            // luckysheetTableContent.closePath();
         }
         luckysheetTableContent.restore();
         
@@ -188,9 +190,9 @@ function luckysheetDrawgridColumnGroup(scrollWidth, drawWidth, offsetLeft) {
             const pos = rowsGroupAreaWidth + Store.visibledatacolumn[j] - scrollWidth - columnlen / 2 + offsetLeft;
 
             luckysheetTableContent.beginPath();
-            luckysheetTableContent.arc(pos, 10 + (i+1) * 10, 0.1, 0, 2 * Math.PI);
-            luckysheetTableContent.stroke();
-            luckysheetTableContent.closePath();
+            luckysheetTableContent.arc(pos, 10 + (i+1) * 10, 1, 0, 2 * Math.PI);
+            luckysheetTableContent.fill();
+            // luckysheetTableContent.closePath();
         }
 
         luckysheetTableContent.restore();
@@ -296,7 +298,6 @@ function luckysheetDrawgridRowTitle(scrollHeight, drawHeight, offsetTop) {
                 end_r - start_r + 1 + lastOffset - firstOffset,
             );
             luckysheetTableContent.fillStyle = "#000000";
-
             //行标题栏序列号
             luckysheetTableContent.save(); //save scale before draw text
             luckysheetTableContent.scale(Store.zoomRatio, Store.zoomRatio);
