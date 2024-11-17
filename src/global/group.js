@@ -84,9 +84,9 @@ export function toggleState(type, index) {
 }
 
 export function getGroupConfig() {
-  const { group } = Store.toJsonOptions || {};
+  const group = Store.toJsonOptions?.group || {};
   return {
-    lineWidth: group.lineWidth || 2,
+    lineWidth: group.lineWidth || 1,
     strokeStyle: group.strokeStyle || '#bcbdbc',
   }
 }

@@ -77,7 +77,7 @@ function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
         const isClose = group.some(g => g.s <= s && g.e >= e && g.o === 0)
         if(isClose) continue;
 
-        const rowlen = Store.config.rowlen[s] || 20;
+        const rowlen = Store.config.rowlen?.[s] || 20;
         const startPos = colsGroupAreaHeight + Store.visibledatarow[s] - scrollHeight - rowlen + offsetTop - 1;
         const endPos = colsGroupAreaHeight + Store.visibledatarow[e] - scrollHeight + offsetTop - 2;
 
@@ -105,7 +105,7 @@ function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
 
             if( isHidden || isClose || inNextLine) continue
             
-            const rowlen = Store.config.rowlen[j] || 20;
+            const rowlen = Store.config.rowlen?.[j] || 20;
             const pos = colsGroupAreaHeight + Store.visibledatarow[j] - scrollHeight - rowlen / 2 + offsetTop;
 
             luckysheetTableContent.beginPath();
@@ -179,7 +179,7 @@ function luckysheetDrawgridColumnGroup(scrollWidth, drawWidth, offsetLeft) {
         const isClose = group.some(g => g.s <= s && g.e >= e && g.o === 0)
         if(isClose) continue;
 
-        const columnlen = Store.config.columnlen[s] || 73;
+        const columnlen = Store.config.columnlen?.[s] || 73;
         const startPos = rowsGroupAreaWidth + Store.visibledatacolumn[s] - scrollWidth - columnlen + offsetLeft - 1;
         const endPos = rowsGroupAreaWidth + Store.visibledatacolumn[e] - scrollWidth + offsetLeft - 2;
         // 大括号
@@ -205,7 +205,7 @@ function luckysheetDrawgridColumnGroup(scrollWidth, drawWidth, offsetLeft) {
 
             if( isHidden || isClose || inNextLine) continue
 
-            const columnlen = Store.config.columnlen[j] || 73;
+            const columnlen = Store.config.columnlen?.[j] || 73;
             const pos = rowsGroupAreaWidth + Store.visibledatacolumn[j] - scrollWidth - columnlen / 2 + offsetLeft;
 
             luckysheetTableContent.beginPath();
