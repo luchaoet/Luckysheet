@@ -19,7 +19,7 @@ import method from "./method";
 import Store from "../store";
 import locale from "../locale/locale";
 import sheetmanage from "../controllers/sheetmanage";
-import { getGroup, getRowsGroupAreaWidth, getColsGroupAreaHeight, getGroupConfig } from './group'
+import { getGroup, getRowsGroupAreaWidth, getColsGroupAreaHeight, getGroupConfig, isCloseRowRange, isCloseColRange } from './group'
 
 function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
     if (scrollHeight == null) {
@@ -38,15 +38,11 @@ function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
         .getContext("2d");
     luckysheetTableContent.save();
     luckysheetTableContent.scale(Store.devicePixelRatio, Store.devicePixelRatio);
-    // luckysheetTableContent.scale(Store.zoomRatio, Store.zoomRatio);
     luckysheetTableContent.clearRect(0, offsetTop, rowsGroupAreaWidth, drawHeight);
-
-    // luckysheetTableContent.save();
     luckysheetTableContent.beginPath();
     luckysheetTableContent.rect(0, offsetTop, rowsGroupAreaWidth, drawHeight);
-    luckysheetTableContent.clip();
-
-    const { rowsGroup } = getGroup()
+    luckysheetTableContent.clip()
+    
 
     let dataset_row_st, dataset_row_ed;
     dataset_row_st = luckysheet_searcharray(Store.visibledatarow, scrollHeight);
@@ -58,69 +54,125 @@ function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
     if (dataset_row_ed == -1) {
         dataset_row_ed = Store.visibledatarow.length - 1;
     }
-    // console.log('visibledatarow', JSON.parse(JSON.stringify(Store.visibledatarow)))
-    // console.log('rowlen', JSON.parse(JSON.stringify(Store.config.rowlen)))
-    // console.log('scrollHeight', scrollHeight)
-
-    const group = Object.values(rowsGroup);
 
     let bodrder05 = 0.5;
-    $("#luckysheet-rows-group-btns").empty()
+    const { rowsGroupLevel } = getGroup();
+    const { lineWidth, strokeStyle, buttonSize, padding, gap } = getGroupConfig();
 
-    const { lineWidth, strokeStyle } = getGroupConfig();
-     
-    for (let i = 0; i < group.length; i++) {
-        const {s, e} = group[i];
-        // 收起/打开按钮
-        $("#luckysheet-rows-group-btns").append(`<div>${i+1}</div>`)
-        // 收起状态 自己本身是收起状态或者处于收起的范围内
-        const isClose = group.some(g => g.s <= s && g.e >= e && g.o === 0)
-        if(isClose) continue;
+    for (let i = 0; i < rowsGroupLevel.length; i++) {
+        for (const item of rowsGroupLevel[i]) {
+            const { s, e } = item;
+            // 收起状态 自己本身是收起状态或者处于收起的范围内
+            const isClose = isCloseRowRange(s, e);
+            if(isClose) continue;
 
-        const rowlen = Store.config.rowlen?.[s] || 20;
-        const startPos = colsGroupAreaHeight + Store.visibledatarow[s] - scrollHeight - rowlen + offsetTop - 1;
-        const endPos = colsGroupAreaHeight + Store.visibledatarow[e] - scrollHeight + offsetTop - 2;
+            const visibledatarow = s === 0 ? 0 : Store.visibledatarow[s - 1];
+            const horizonPos = bodrder05 + padding + buttonSize / 2 + (buttonSize + gap) * i;
+            const verticalStartPos = colsGroupAreaHeight + visibledatarow - scrollHeight + offsetTop + 1;
+            const verticalEndPos = colsGroupAreaHeight + Store.visibledatarow[e] - scrollHeight + offsetTop + 1;
 
-        // 大括号
-        luckysheetTableContent.save();
-        // luckysheetTableContent.scale(Store.zoomRatio, Store.zoomRatio);
-        luckysheetTableContent.beginPath();
-        luckysheetTableContent.moveTo(bodrder05 + 15 + i * 10, startPos);
-        luckysheetTableContent.lineTo(bodrder05 + 10 + i * 10, startPos);
-        luckysheetTableContent.lineTo(bodrder05 + 10 + i * 10, endPos);
-        luckysheetTableContent.lineTo(bodrder05 + 15 + i * 10, endPos);
-        luckysheetTableContent.lineWidth = lineWidth;
-        luckysheetTableContent.strokeStyle = strokeStyle;
-        luckysheetTableContent.stroke();
-        luckysheetTableContent.closePath();
-        
-        // 大括号内的点
-        for (let j = s; j <= e; j++) {
-            // 忽略隐藏或分组收起的列
-            const rowHidden = Store.config.rowhidden || {};
-            const isHidden = rowHidden[j] != null;
-            const isClose = group.some(g => g.s <= j && g.e >= j && g.o === 0)
-            // 这个点在下一个线条上，也不绘制
-            const inNextLine = i < group.length - 1 && group[i + 1].s <= j && group[i + 1].e >= j;
-
-            if( isHidden || isClose || inNextLine) continue
-            
-            const rowlen = Store.config.rowlen?.[j] || 20;
-            const pos = colsGroupAreaHeight + Store.visibledatarow[j] - scrollHeight - rowlen / 2 + offsetTop;
-
+            // 大括号
+            luckysheetTableContent.save();
             luckysheetTableContent.beginPath();
-            luckysheetTableContent.fillStyle = strokeStyle;
-            luckysheetTableContent.arc(bodrder05 + 10 + (i+1) * 10, pos, 1, 0, 2 * Math.PI);
-            luckysheetTableContent.fill();
+            luckysheetTableContent.moveTo(horizonPos + 5 * Store.zoomRatio, verticalStartPos);
+            luckysheetTableContent.lineTo(horizonPos, verticalStartPos);
+            luckysheetTableContent.lineTo(horizonPos, verticalEndPos);
+            luckysheetTableContent.lineWidth = lineWidth;
+            luckysheetTableContent.strokeStyle = strokeStyle;
+            luckysheetTableContent.stroke();
             luckysheetTableContent.closePath();
+            
+            // 大括号内的点
+            for (let j = s; j <= e; j++) {
+                // 忽略隐藏或分组收起的列
+                const rowHidden = Store.config.rowhidden || {};
+                const isHidden = rowHidden[j] != null;
+                const isClose = isCloseRowRange(j, j);
+                // 这个点在下一个线条上，也不绘制
+                const inNextLine = i < rowsGroupLevel.length - 1 && 
+                rowsGroupLevel[i + 1].some(r => r.s <= j && r.e >= j);
+                if( isHidden || isClose || inNextLine) continue
+                
+                const rowlen = (Store.config.rowlen?.[j] || 20) * Store.zoomRatio;
+                const horizonPos = bodrder05 + padding + buttonSize / 2 + (buttonSize + gap) * (i + 1);
+                const verticalPos = colsGroupAreaHeight + Store.visibledatarow[j] - scrollHeight + offsetTop - rowlen / 2;
+
+                luckysheetTableContent.beginPath();
+                luckysheetTableContent.fillStyle = strokeStyle;
+                luckysheetTableContent.arc(horizonPos, verticalPos, 1, 0, 2 * Math.PI);
+                luckysheetTableContent.fill();
+                luckysheetTableContent.closePath();
+            }
+            luckysheetTableContent.restore();
         }
-        luckysheetTableContent.restore();
-        
     }
 
-    // luckysheetTableContent.restore();
+    // 避免被大括号线条干扰 在其后单独绘制线条上的按钮
+    for (let i = 0; i < rowsGroupLevel.length; i++) {
+        for (const item of rowsGroupLevel[i]) {
+            const { e, o } = item;
+            const horizonPos = bodrder05 + padding + (buttonSize + gap) * i;
+            const verticalPos = colsGroupAreaHeight + Store.visibledatarow[e] - scrollHeight + offsetTop;
+            // 按钮
+            luckysheetTableContent.lineWidth = lineWidth;
+            luckysheetTableContent.fillStyle = strokeStyle;
+            luckysheetTableContent.beginPath();
+            luckysheetTableContent.fillRect(horizonPos, verticalPos, buttonSize, buttonSize);
+            luckysheetTableContent.closePath();
+            luckysheetTableContent.fillStyle = '#fff';
+            luckysheetTableContent.textAlign = 'center';
+            luckysheetTableContent.textBaseline = 'middle';
+            luckysheetTableContent.font = 'middle';
+            luckysheetTableContent.font = `${10 * Store.zoomRatio}px Arial`;
+            luckysheetTableContent.fillText(
+                o === 0 ? '+' : '-', 
+                horizonPos + buttonSize / 2, 
+                verticalPos + buttonSize / 2
+            );
+        }
+    }
     luckysheetTableContent.restore();
 
+    // 清除左上角 便于绘制左上角的按钮
+    luckysheetTableContent.save()
+    luckysheetTableContent.scale(Store.devicePixelRatio, Store.devicePixelRatio);
+    luckysheetTableContent.clearRect( 0, 0, rowsGroupAreaWidth, colsGroupAreaHeight + Store.columnHeaderHeight - 3);
+
+    luckysheetTableContent.lineWidth = 1;
+    luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.strokeStyle;
+    luckysheetTableContent.beginPath();
+    luckysheetTableContent.moveTo(0, bodrder05 + colsGroupAreaHeight);
+    luckysheetTableContent.lineTo(rowsGroupAreaWidth + Store.rowHeaderWidth, bodrder05 + colsGroupAreaHeight);
+    luckysheetTableContent.stroke();
+    luckysheetTableContent.closePath();
+
+    luckysheetTableContent.beginPath();
+    luckysheetTableContent.moveTo(0, colsGroupAreaHeight + Store.columnHeaderHeight - 2);
+    luckysheetTableContent.lineTo(rowsGroupAreaWidth + Store.rowHeaderWidth, colsGroupAreaHeight + Store.columnHeaderHeight - 2);
+    luckysheetTableContent.stroke();
+    luckysheetTableContent.closePath();
+
+    for (let i = 0; i < rowsGroupLevel.length; i++) {
+        luckysheetTableContent.lineWidth = 1;
+        luckysheetTableContent.fillStyle = '#ededed';
+        luckysheetTableContent.textAlign = 'center';
+        luckysheetTableContent.textBaseline = 'middle';  
+        luckysheetTableContent.font = 'middle';  
+        luckysheetTableContent.font = `${10 * Store.zoomRatio}px Arial`;
+        
+        const horizonPos = bodrder05 + padding + (buttonSize + gap) * i;
+        const verticalPos = colsGroupAreaHeight + Store.columnHeaderHeight / 2 - buttonSize / 2;
+        luckysheetTableContent.beginPath();
+        luckysheetTableContent.fillRect(horizonPos, verticalPos, buttonSize, buttonSize);
+        luckysheetTableContent.closePath();
+        luckysheetTableContent.fillStyle = '#000';
+        luckysheetTableContent.fillText(
+            i+1,
+            horizonPos + buttonSize / 2, 
+            verticalPos + buttonSize / 2
+        );
+    }
+    luckysheetTableContent.restore();
 }
 
 function luckysheetDrawgridColumnGroup(scrollWidth, drawWidth, offsetLeft) {
@@ -140,9 +192,13 @@ function luckysheetDrawgridColumnGroup(scrollWidth, drawWidth, offsetLeft) {
     let luckysheetTableContent = $("#luckysheetTableContent")
         .get(0)
         .getContext("2d");
+
     luckysheetTableContent.save();
     luckysheetTableContent.scale(Store.devicePixelRatio, Store.devicePixelRatio);
-    // // luckysheetTableContent.clearRect(offsetLeft, 0, drawWidth, Store.columnHeaderHeight - 1);
+    luckysheetTableContent.clearRect(offsetLeft, 0, drawWidth, colsGroupAreaHeight);
+    luckysheetTableContent.beginPath();
+    luckysheetTableContent.rect(offsetLeft, 0, drawWidth, colsGroupAreaHeight);
+    luckysheetTableContent.clip();
 
     luckysheetTableContent.textBaseline = luckysheetdefaultstyle.textBaseline; //基准线 垂直居中
     luckysheetTableContent.fillStyle = luckysheetdefaultstyle.fillStyle;
@@ -157,69 +213,124 @@ function luckysheetDrawgridColumnGroup(scrollWidth, drawWidth, offsetLeft) {
     if (dataset_col_ed == -1) {
         dataset_col_ed = Store.visibledatacolumn.length - 1;
     }
-    
-    luckysheetTableContent.beginPath();
-    luckysheetTableContent.rect(offsetLeft - 1, 0, drawWidth, colsGroupAreaHeight - 1);
-    luckysheetTableContent.clip();
-
-    const { colsGroup } = getGroup()
-
-    const group = Object.values(colsGroup);
 
     let bodrder05 = 0.5;
-    $("#luckysheet-cols-group-btns").empty()
+    const { colsGroupLevel } = getGroup();
+    const { lineWidth, strokeStyle, buttonSize, padding, gap } = getGroupConfig();
 
-    const { lineWidth, strokeStyle } = getGroupConfig();
+    for (let i = 0; i < colsGroupLevel.length; i++) {
+        for (const item of colsGroupLevel[i]) {
+            const { s, e } = item;
+            // 收起状态 自己本身是收起状态或者处于收起的范围内
+            const isClose = isCloseColRange(s, e);
+            if(isClose) continue;
 
-    for (let i = 0; i < group.length; i++) {
-        const {s, e} = group[i];
-        // 收起/打开按钮
-        $("#luckysheet-cols-group-btns").append(`<div>${i+1}</div>`)
-        // 收起状态 自己本身是收起状态或者处于收起的范围内
-        const isClose = group.some(g => g.s <= s && g.e >= e && g.o === 0)
-        if(isClose) continue;
+            const visibledatacolumn = s === 0 ? 0 : Store.visibledatacolumn[s - 1];
+            const verticalPos = bodrder05 + padding + buttonSize / 2 + (buttonSize + gap) * i;
+            const horizonStartPos = rowsGroupAreaWidth + visibledatacolumn - scrollWidth + offsetLeft + 1;
+            const horizonEndPos = rowsGroupAreaWidth + Store.visibledatacolumn[e] - scrollWidth + offsetLeft + 1;
 
-        const columnlen = Store.config.columnlen?.[s] || 73;
-        const startPos = rowsGroupAreaWidth + Store.visibledatacolumn[s] - scrollWidth - columnlen + offsetLeft - 1;
-        const endPos = rowsGroupAreaWidth + Store.visibledatacolumn[e] - scrollWidth + offsetLeft - 2;
-        // 大括号
-        luckysheetTableContent.save();
-        // luckysheetTableContent.scale(Store.zoomRatio, Store.zoomRatio);
-        luckysheetTableContent.beginPath();
-        luckysheetTableContent.moveTo(bodrder05 + startPos, 15 + i * 10);
-        luckysheetTableContent.lineTo(bodrder05 + startPos, 10 + i * 10);
-        luckysheetTableContent.lineTo(bodrder05 + endPos, 10 + i * 10);
-        luckysheetTableContent.lineTo(bodrder05 + endPos, 15 + i * 10);
-        luckysheetTableContent.lineWidth = lineWidth;
-        luckysheetTableContent.strokeStyle = strokeStyle;
-        luckysheetTableContent.stroke();
-        luckysheetTableContent.closePath();
-        // 大括号内的点
-        for (let j = s; j <= e; j++) {
-            // 忽略隐藏或分组收起的列
-            const colHidden = Store.config.colhidden || {};
-            const isHidden = colHidden[j] != null;
-            const isClose = group.some(g => g.s <= j && g.e >= j && g.o === 0)
-            // 这个点在下一个线条上，也不绘制
-            const inNextLine = i < group.length - 1 && group[i + 1].s <= j && group[i + 1].e >= j;
-
-            if( isHidden || isClose || inNextLine) continue
-
-            const columnlen = Store.config.columnlen?.[j] || 73;
-            const pos = rowsGroupAreaWidth + Store.visibledatacolumn[j] - scrollWidth - columnlen / 2 + offsetLeft;
-
+            // 大括号
+            luckysheetTableContent.save();
             luckysheetTableContent.beginPath();
-            luckysheetTableContent.fillStyle = strokeStyle;
-            luckysheetTableContent.arc(pos, 10 + (i+1) * 10, 1, 0, 2 * Math.PI);
-            luckysheetTableContent.fill();
-            // luckysheetTableContent.closePath();
-        }
+            luckysheetTableContent.moveTo(horizonStartPos, verticalPos + 5 * Store.zoomRatio);
+            luckysheetTableContent.lineTo(horizonStartPos, verticalPos);
+            luckysheetTableContent.lineTo(horizonEndPos, verticalPos);
+            luckysheetTableContent.lineWidth = lineWidth;
+            luckysheetTableContent.strokeStyle = strokeStyle;
+            luckysheetTableContent.stroke();
+            luckysheetTableContent.closePath();
 
-        luckysheetTableContent.restore();
-        
+            // 大括号内的点
+            for (let j = s; j <= e; j++) {
+                // 忽略隐藏或分组收起的列
+                const colHidden = Store.config.colhidden || {};
+                const isHidden = colHidden[j] != null;
+                const isClose = isCloseColRange(j, j);
+                // 这个点在下一个线条上，也不绘制
+                const inNextLine = i < colsGroupLevel.length - 1 && 
+                colsGroupLevel[i + 1].some(r => r.s <= j && r.e >= j);
+                if( isHidden || isClose || inNextLine) continue
+                
+                const columnlen = (Store.config.columnlen?.[j] || 73) * Store.zoomRatio;
+                const verticalPos = bodrder05 + padding + buttonSize / 2 + (buttonSize + gap) * (i + 1);
+                const horizonPos = rowsGroupAreaWidth + Store.visibledatacolumn[j] - scrollWidth + offsetLeft - columnlen / 2;
+
+                luckysheetTableContent.beginPath();
+                luckysheetTableContent.fillStyle = strokeStyle;
+                luckysheetTableContent.arc(horizonPos, verticalPos, 1, 0, 2 * Math.PI);
+                luckysheetTableContent.fill();
+                luckysheetTableContent.closePath();
+            }
+            luckysheetTableContent.restore();
+        }
     }
 
-    
+    // 避免被大括号线条干扰 在其后单独绘制线条上的按钮
+    for (let i = 0; i < colsGroupLevel.length; i++) {
+        for (const item of colsGroupLevel[i]) {
+            const { e, o } = item;
+            const horizonPos = rowsGroupAreaWidth + Store.visibledatacolumn[e] - scrollWidth + offsetLeft;
+            const verticalPos = bodrder05 + padding + (buttonSize + gap) * i;
+            // 按钮
+            luckysheetTableContent.save();
+            luckysheetTableContent.lineWidth = lineWidth;
+            luckysheetTableContent.fillStyle = strokeStyle;
+            luckysheetTableContent.fillRect(horizonPos, verticalPos, buttonSize, buttonSize);
+            luckysheetTableContent.fillStyle = '#fff';
+            luckysheetTableContent.textAlign = 'center';
+            luckysheetTableContent.textBaseline = 'middle';
+            luckysheetTableContent.font = 'middle';
+            luckysheetTableContent.font = `${10 * Store.zoomRatio}px Arial`;
+            luckysheetTableContent.fillText(
+                o === 0 ? '+' : '-', 
+                horizonPos + buttonSize / 2, 
+                verticalPos + buttonSize / 2
+            );
+            luckysheetTableContent.restore();
+        }
+    }
+
+    luckysheetTableContent.restore()
+
+    // 清除左上角 便于绘制左上角的按钮
+    luckysheetTableContent.save()
+    luckysheetTableContent.scale(Store.devicePixelRatio, Store.devicePixelRatio);
+    luckysheetTableContent.clearRect( 0, 0, rowsGroupAreaWidth + Store.rowHeaderWidth - 3, colsGroupAreaHeight);
+
+    luckysheetTableContent.lineWidth = 1;
+    luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.strokeStyle;
+    luckysheetTableContent.beginPath();
+    luckysheetTableContent.moveTo(bodrder05 + rowsGroupAreaWidth, 0);
+    luckysheetTableContent.lineTo(bodrder05 + rowsGroupAreaWidth, colsGroupAreaHeight + Store.columnHeaderHeight);
+    luckysheetTableContent.stroke();
+    luckysheetTableContent.closePath();
+
+    luckysheetTableContent.beginPath();
+    luckysheetTableContent.moveTo(0 + rowsGroupAreaWidth + Store.rowHeaderWidth - 1, 0);
+    luckysheetTableContent.lineTo(0 + rowsGroupAreaWidth + Store.rowHeaderWidth - 1, colsGroupAreaHeight + Store.columnHeaderHeight);
+    luckysheetTableContent.stroke();
+    luckysheetTableContent.closePath();
+
+    for (let i = 0; i < colsGroupLevel.length; i++) {
+        luckysheetTableContent.lineWidth = 1;
+        luckysheetTableContent.fillStyle = '#ededed';
+        luckysheetTableContent.textAlign = 'center';
+        luckysheetTableContent.textBaseline = 'middle';  
+        luckysheetTableContent.font = 'middle';  
+        luckysheetTableContent.font = `${10 * Store.zoomRatio}px Arial`;
+
+        const horizonPos = rowsGroupAreaWidth + Store.rowHeaderWidth / 2 - buttonSize / 2;
+        const verticalPos = bodrder05 + padding + (buttonSize + gap) * i;
+
+        luckysheetTableContent.fillRect(horizonPos, verticalPos, buttonSize, buttonSize);
+        luckysheetTableContent.fillStyle = '#000';
+        luckysheetTableContent.fillText(
+            i+1,
+            horizonPos + buttonSize / 2, 
+            verticalPos + buttonSize / 2
+        );
+    }
     luckysheetTableContent.restore();
 }
 
@@ -340,7 +451,7 @@ function luckysheetDrawgridRowTitle(scrollHeight, drawHeight, offsetTop) {
         // 右竖线
         luckysheetTableContent.beginPath();
         luckysheetTableContent.moveTo(rowsGroupAreaWidth + Store.rowHeaderWidth - 2 + bodrder05, start_r + offsetTop - 2);
-        luckysheetTableContent.lineTo(rowsGroupAreaWidth + Store.rowHeaderWidth - 2 + bodrder05,  end_r + offsetTop - 2);
+        luckysheetTableContent.lineTo(rowsGroupAreaWidth + Store.rowHeaderWidth - 2 + bodrder05, end_r + offsetTop - 2);
         luckysheetTableContent.lineWidth = 1;
         luckysheetTableContent.strokeStyle = luckysheetdefaultstyle.strokeStyle;
         luckysheetTableContent.stroke();

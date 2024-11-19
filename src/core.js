@@ -12,6 +12,7 @@ import { initialMatrixOperation } from "./controllers/matrixOperation";
 import { initialSheetBar } from "./controllers/sheetBar";
 import { formulaBarInitial } from "./controllers/formulaBar";
 import { rowColumnOperationInitial } from "./controllers/rowColumnOperation";
+import { groupOperationInitial } from "./controllers/groupOperation";
 import { keyboardInitial } from "./controllers/keyboard";
 import { orderByInitial } from "./controllers/orderBy";
 import { initPlugins } from "./controllers/expendPlugins";
@@ -192,6 +193,7 @@ function initialWorkBook() {
     initialSheetBar(); //bottom sheet bar initialization
     formulaBarInitial(); //top formula bar initialization
     rowColumnOperationInitial(); //row and coloumn operate initialization
+    groupOperationInitial(); // 分组操作初始化
     keyboardInitial(); //Keyboard operate initialization
     orderByInitial(); //menu bar orderby function initialization
     zoomInitial(); //zoom method initialization

@@ -1364,13 +1364,13 @@ function luckysheetrefreshgrid(scrollWidth, scrollHeight) {
         luckysheetDrawgridRowGroup(scrollHeight);
     }
     // 清除canvas左上角区域 防止列标题栏序列号溢出显示
-    const luckysheetTableContent = $("#luckysheetTableContent").get(0).getContext("2d");
-    luckysheetTableContent.clearRect(
-        0, 
-        0, 
-        (Store.rowHeaderWidth + rowsGroupAreaWidth) * Store.devicePixelRatio - 2, 
-        (Store.columnHeaderHeight + colsGroupAreaHeight)* Store.devicePixelRatio - 2 
-    );
+    // const luckysheetTableContent = $("#luckysheetTableContent").get(0).getContext("2d");
+    // luckysheetTableContent.clearRect(
+    //     0, 
+    //     0, 
+    //     (Store.rowHeaderWidth + rowsGroupAreaWidth) * Store.devicePixelRatio - 2, 
+    //     (Store.columnHeaderHeight + colsGroupAreaHeight)* Store.devicePixelRatio - 2 
+    // );
     
     // 更新单元格区域宽高
     const gridW = $("#" + Store.container).width();

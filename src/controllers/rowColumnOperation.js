@@ -27,23 +27,9 @@ import {
 } from "./protection";
 import Store from "../store";
 import luckysheetConfigsetting from "./luckysheetConfigsetting";
-import { toggleState, getGroup, addRowsGroupItem, addColsGroupItem, deleteRowsGroupItem, deleteColsGroupItem  } from "../global/group";
+import { getGroup, addRowsGroupItem, addColsGroupItem, deleteRowsGroupItem, deleteColsGroupItem  } from "../global/group";
 
 export function rowColumnOperationInitial() {
-
-    $("#luckysheet-rows-group-btns").on('click', 'div', function(event) {
-        const index = $(this).index()
-        toggleState('row', index)
-        jfrefreshgrid_rhcw(Store.flowdata.length, Store.flowdata[0].length);
-    });
-
-    $("#luckysheet-cols-group-btns").on('click', 'div', function(event) {
-        const index = $(this).index()
-        toggleState('col', index)
-        jfrefreshgrid_rhcw(Store.flowdata.length, Store.flowdata[0].length);
-    });
-
-
     //表格行标题 mouse事件
     $("#luckysheet-rows-h")
         .mousedown(function(event) {

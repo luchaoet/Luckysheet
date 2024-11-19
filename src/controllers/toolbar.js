@@ -48,6 +48,7 @@ export const defaultToolbar = [
     '|',
 
     'function',
+    'groupModel',
     'frozenMode',
     'sortAndFilter',
     'conditionalFormat',
@@ -91,6 +92,7 @@ export const toolbarIdMap = {
     pivotTable: ['#luckysheet-pivot-btn-title'], //'PivotTable'
     function: ['#luckysheet-icon-function', '#luckysheet-icon-function-menu'], //'formula'
     frozenMode: ['#luckysheet-freezen-btn-horizontal', '#luckysheet-icon-freezen-menu'], //'freeze mode'
+    groupModel: ['#luckysheet-group-btn-horizontal', '#luckysheet-icon-group-menu'],
     sortAndFilter: '#luckysheet-icon-autofilter', //'sort and filter'
     conditionalFormat: '#luckysheet-icon-conditionformat', //'Conditional Format'
     dataVerification: '#luckysheet-dataVerification-btn-title', // 'Data Verification'
@@ -693,6 +695,31 @@ export function createToolbarHtml() {
                 </div>
             </div>
         </div>`, //'freeze mode'
+        groupModel: `<div class="luckysheet-toolbar-button-split-left luckysheet-toolbar-button luckysheet-inline-block luckysheet-freezen-btn-horizontal"
+        data-tips="创建/取消组合" id="luckysheet-group-btn-horizontal" role="button" style="user-select: none;">
+            <div class="luckysheet-toolbar-button-outer-box luckysheet-inline-block"
+            style="user-select: none;">
+                <div class="luckysheet-toolbar-menu-button-inner-box luckysheet-inline-block"
+                style="user-select: none;">
+                <svg t="1732020338955" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3663" width="20" height="20"><path d="M175.364267 477.457067v-74.496a28.3392 28.3392 0 0 1 28.343466-28.334934 28.3392 28.3392 0 0 1 28.343467 28.334934v74.496h74.496a28.3392 28.3392 0 0 1 28.334933 28.343466 28.3392 28.3392 0 0 1-28.334933 28.343467h-74.496v74.496a28.3392 28.3392 0 0 1-28.343467 28.334933 28.3392 28.3392 0 0 1-28.343466-28.334933v-74.496h-74.496A28.3392 28.3392 0 0 1 72.533333 505.800533a28.3392 28.3392 0 0 1 28.334934-28.343466h74.496z m272.861866 113.873066h368.366934V409.937067h-368.366934v181.393066z m0 62.353067v158.72a25.506133 25.506133 0 0 0 25.501867 25.5104h317.3632a25.506133 25.506133 0 0 0 25.501867-25.5104v-158.72h-368.366934z m0-306.103467h368.366934V194.530133a25.506133 25.506133 0 0 0-25.501867-25.5104H473.728a25.506133 25.506133 0 0 0-25.501867 25.5104v153.0496zM473.728 106.666667h317.3632C839.6032 106.666667 878.933333 146.005333 878.933333 194.530133v617.873067C878.933333 860.928 839.6032 900.266667 791.0912 900.266667H473.728c-48.512 0-87.842133-39.338667-87.842133-87.863467V194.530133C385.885867 146.005333 425.216 106.666667 473.728 106.666667z" fill="#2C2C2E" p-id="3664"></path></svg>
+                <svg t="1732020230981" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2517" width="20" height="20"><path d="M432.494933 412.770133V350.417067h406.9376v62.353066h-406.9376z m-224.746666 55.7824l52.6976-52.6976a28.343467 28.343467 0 1 1 40.085333 40.081067l-52.6976 52.6976 52.693333 52.6976a28.343467 28.343467 0 1 1-40.081066 40.085333l-52.693334-52.6976-52.701866 52.693334a28.343467 28.343467 0 1 1-40.081067-40.081067l52.6976-52.693333-52.6976-52.701867a28.343467 28.343467 0 1 1 40.081067-40.081067l52.6976 52.693334z m236.087466 125.610667h368.4736V194.530133a25.5104 25.5104 0 0 0-25.5104-25.5104h-317.4528a25.5104 25.5104 0 0 0-25.514666 25.5104v399.633067z m0 62.353067v155.886933a25.5104 25.5104 0 0 0 25.5104 25.5104h317.4528a25.5104 25.5104 0 0 0 25.5104-25.5104v-155.886933h-368.4736zM469.346133 106.666667h317.4528C835.328 106.666667 874.666667 146.005333 874.666667 194.530133v617.873067C874.666667 860.928 835.328 900.266667 786.798933 900.266667h-317.4528c-48.529067 0-87.867733-39.338667-87.867733-87.863467V194.530133C381.4784 146.005333 420.817067 106.666667 469.346133 106.666667z" fill="#2C2C2E" p-id="2518"></path></svg>
+                    <div class="luckysheet-toolbar-menu-button-caption luckysheet-inline-block"
+                    style="user-select: none;">组合</div>
+                </div>
+            </div>
+        </div>
+        <div class="luckysheet-toolbar-button-split-right luckysheet-toolbar-menu-button luckysheet-inline-block"
+        data-tips="${toolbar.moreOptions}..." id="luckysheet-icon-group-menu" role="button" style="user-select: none;">
+            <div class="luckysheet-toolbar-menu-button-outer-box luckysheet-inline-block"
+            style="user-select: none;">
+                <div class="luckysheet-toolbar-menu-button-inner-box luckysheet-inline-block"
+                style="user-select: none;">
+                    <div class="luckysheet-toolbar-menu-button-dropdown luckysheet-inline-block iconfont-luckysheet luckysheet-iconfont-xiayige"
+                    style="user-select: none;">
+                    </div>
+                </div>
+            </div>
+        </div>`, //'group mode'
         sortAndFilter: `<div class="luckysheet-toolbar-select luckysheet-toolbar-menu-button luckysheet-inline-block" data-tips="${toolbar.sortAndFilter}"
         id="luckysheet-icon-autofilter" role="button" style="user-select: none;">
             <div class="luckysheet-toolbar-menu-button-outer-box luckysheet-inline-block"
