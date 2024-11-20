@@ -524,12 +524,6 @@ function rightclickHTML() {
                         </div>
                     </div>
 
-                    <div id="luckysheet-row-col-group" class="luckysheet-cols-menuitem luckysheet-mousedown-cancel">
-                        <div class="luckysheet-cols-menuitem-content luckysheet-mousedown-cancel">
-                            创建/取消组合
-                        </div>
-                    </div>
-
                     <div id="luckysheet-column-row-width-selected" class="luckysheet-cols-menuitem luckysheet-mousedown-cancel">
                         <div class="luckysheet-cols-menuitem-content luckysheet-mousedown-cancel">
                             <span class="luckysheet-cols-rows-shift-word luckysheet-mousedown-cancel">${

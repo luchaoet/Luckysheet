@@ -2011,35 +2011,7 @@ export function rowColumnOperationInitial() {
             jfrefreshgrid_rhcw(Store.flowdata.length, Store.flowdata[0].length);
         }
     });
-    $("#luckysheet-row-col-group").click(function() {
-        $("#luckysheet-rightclick-menu").hide();
-        luckysheetContainerFocus();
-        const {row_select, column_select, row, column } = Store.luckysheet_select_save?.[0] || {};
-        const { rowsGroup, colsGroup } = getGroup();
-        
-        if(row_select) {
-            const [s, e] = row;
-            const key = `${s}_${e}`;
-            if(key in rowsGroup) {
-                deleteRowsGroupItem(s, e)
-            }else{
-                addRowsGroupItem(s, e)
-            }
-        }
-        if(column_select) {
-            const [s, e] = column;
-            const key = `${s}_${e}`;
-            if(key in colsGroup) {
-                deleteColsGroupItem(s, e)
-            }else{
-                addColsGroupItem(s, e)
-            }
-        }
 
-        Store.luckysheetfile[getSheetIndex(Store.currentSheetIndex)].config = Store.config;
-        //行高、列宽 刷新
-        jfrefreshgrid_rhcw(Store.flowdata.length, Store.flowdata[0].length);
-    })
     //隐藏、显示行
     // $("#luckysheet-hidRows").click(function (event) {
     //     if(!checkProtectionAuthorityNormal(Store.currentSheetIndex, "formatRows")){
