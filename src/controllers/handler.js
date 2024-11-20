@@ -70,7 +70,7 @@ import Store from "../store";
 import { createLuckyChart, hideAllNeedRangeShow } from "../expendPlugins/chart/plugin";
 import luckysheetformula from "../global/formula";
 import {createExportDialog,fetchAndDownloadXlsx} from "../expendPlugins/exportXlsx/plugin";
-import { getColsGroupAreaHeight, getRowsGroupAreaWidth } from "../global/group";
+import { addColsGroupItem, addRowsGroupItem, deleteColsGroupItem, deleteRowsGroupItem, getColsGroupAreaHeight, getGroup, getRowsGroupAreaWidth } from "../global/group";
 
 //, columeflowset, rowflowset
 export default function luckysheetHandler() {

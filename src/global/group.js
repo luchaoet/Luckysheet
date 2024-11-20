@@ -1,5 +1,10 @@
 import Store from "../store";
 
+export function clearGroup() {
+  Store.config.rowsGroup = {}
+  Store.config.colsGroup = {}
+}
+
 export function addRowsGroupItem(s, e, o = 1) {
   if(!Store.config.rowsGroup) {
     Store.config.rowsGroup = {}

@@ -20,7 +20,7 @@ import { isRealNum, isRealNull, isEditMode, hasPartMC, checkIsAllowEdit } from "
 import tooltip from "../global/tooltip";
 import editor from "../global/editor";
 import { genarate, update, is_date } from "../global/format";
-import { jfrefreshgrid, luckysheetrefreshgrid } from "../global/refresh";
+import { jfrefreshgrid, jfrefreshgrid_rhcw, luckysheetrefreshgrid } from "../global/refresh";
 import { sortSelection } from "../global/sort";
 import luckysheetformula from "../global/formula";
 import { rowLocationByIndex, colLocationByIndex } from "../global/location";
@@ -52,6 +52,7 @@ import { openProtectionModal, checkProtectionFormatCells, checkProtectionNotEnab
 import Store from "../store";
 import locale from "../locale/locale";
 import { checkTheStatusOfTheSelectedCells, frozenFirstRow, frozenFirstColumn } from "../global/api";
+import { addColsGroupItem, addRowsGroupItem, clearGroup, deleteColsGroupItem, deleteRowsGroupItem, getGroup } from "../global/group";
 
 const menuButton = {
     menu:
@@ -2520,6 +2521,89 @@ const menuButton = {
                 menuleft = menuleft - tlen + userlen;
             }
             mouseclickposition($menuButton, menuleft - 68, $(this).offset().top + 25, "lefttop");
+        });
+
+        // 组合
+        $("#luckysheet-icon-group").click(function() {
+            let menuButtonId = $(this).attr("id") + "-menuButton";
+            let $menuButton = $("#" + menuButtonId);
+            
+            if ($menuButton.length == 0) {
+                const itemdata = [
+                    { text: '创建组合', value: "create", example: '' },
+                    { text: '取消组合', value: "delete", example: '' },
+                    { text: '清除分级显示', value: "clear", example: '' }
+                ]
+                let itemset = _this.createButtonMenu(itemdata);
+                let menu = replaceHtml(_this.menu, { id: "group", item: itemset, subclass: "", sub: "" });
+                $("body").append(menu);
+                $menuButton = $("#" + menuButtonId).width(150);
+                $menuButton.find(".luckysheet-cols-menuitem").click(function() {
+                    $menuButton.hide();
+                    luckysheetContainerFocus();
+
+                    let $t = $(this), itemvalue = $t.attr("itemvalue");
+
+                    if(itemvalue === 'create') {
+                        const {row_select, column_select, row, column } = Store.luckysheet_select_save?.[0] || {};
+                        const { rowsGroup, colsGroup } = getGroup();
+                        if(row_select) {
+                            const [s, e] = row;
+                            const key = `${s}_${e}`;
+                            if(key in rowsGroup) {
+                                return;
+                            }else{
+                                addRowsGroupItem(s, e)
+                            }
+                        }
+                        if(column_select) {
+                            const [s, e] = column;
+                            const key = `${s}_${e}`;
+                            if(key in colsGroup) {
+                                return;
+                            }else{
+                                addColsGroupItem(s, e)
+                            }
+                        }
+                        
+                    }else if(itemvalue === 'delete') {
+                        const {row_select, column_select, row, column } = Store.luckysheet_select_save?.[0] || {};
+                        const { rowsGroup, colsGroup } = getGroup();
+                        if(row_select) {
+                            const [s, e] = row;
+                            const key = `${s}_${e}`;
+                            if(key in rowsGroup) {
+                                deleteRowsGroupItem(s, e)
+                            }else{
+                                return;
+                            }
+                        }
+                        if(column_select) {
+                            const [s, e] = column;
+                            const key = `${s}_${e}`;
+                            if(key in colsGroup) {
+                                deleteColsGroupItem(s, e)
+                            }else{
+                                return;
+                            }
+                        }
+
+                    }else if(itemvalue === 'clear'){
+                        clearGroup()
+                    }
+                    Store.luckysheetfile[getSheetIndex(Store.currentSheetIndex)].config = Store.config;
+                    jfrefreshgrid_rhcw(Store.flowdata.length, Store.flowdata[0].length);
+                });
+            }
+
+            let userlen = $(this).outerWidth();
+            let tlen = $menuButton.outerWidth();
+
+            let menuleft = $(this).offset().left;
+            if (tlen > userlen && tlen + menuleft > $("#" + Store.container).width()) {
+                menuleft = menuleft - tlen + userlen;
+            }
+            mouseclickposition($menuButton, menuleft, $(this).offset().top + 25, "lefttop");
         });
 
         //过滤和排序

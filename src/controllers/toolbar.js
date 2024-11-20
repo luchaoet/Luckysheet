@@ -48,8 +48,8 @@ export const defaultToolbar = [
     '|',
 
     'function',
-    'groupModel',
     'frozenMode',
+    'group',
     'sortAndFilter',
     'conditionalFormat',
     'dataVerification',
@@ -92,7 +92,6 @@ export const toolbarIdMap = {
     pivotTable: ['#luckysheet-pivot-btn-title'], //'PivotTable'
     function: ['#luckysheet-icon-function', '#luckysheet-icon-function-menu'], //'formula'
     frozenMode: ['#luckysheet-freezen-btn-horizontal', '#luckysheet-icon-freezen-menu'], //'freeze mode'
-    groupModel: ['#luckysheet-group-btn-horizontal', '#luckysheet-icon-group-menu'],
     sortAndFilter: '#luckysheet-icon-autofilter', //'sort and filter'
     conditionalFormat: '#luckysheet-icon-conditionformat', //'Conditional Format'
     dataVerification: '#luckysheet-dataVerification-btn-title', // 'Data Verification'
@@ -101,7 +100,8 @@ export const toolbarIdMap = {
     findAndReplace: '#luckysheet-icon-seachmore', //'Find and Replace'
     protection: '#luckysheet-icon-protection', // 'Worksheet protection'
     print: '#luckysheet-icon-print', // 'print'
-    exportXlsx: '#luckysheet-exportXlsx-btn-title' // 'export xlsx'
+    exportXlsx: '#luckysheet-exportXlsx-btn-title', // 'export xlsx'
+    group: '#luckysheet-icon-group', // 组合
 };
 
 // 创建工具栏按钮的html
@@ -110,6 +110,21 @@ export function createToolbarHtml() {
     const fontarray = locale().fontarray;
     const defaultFmtArray = locale().defaultFmt;
     const htmlMap = {
+        group: `<div class="luckysheet-toolbar-select luckysheet-toolbar-menu-button luckysheet-inline-block" data-tips="创建/取消组合"
+        id="luckysheet-icon-group" role="button" style="user-select: none;">
+            <div class="luckysheet-toolbar-menu-button-outer-box luckysheet-inline-block"
+            style="user-select: none;">
+                <div class="luckysheet-toolbar-menu-button-inner-box luckysheet-inline-block" style="user-select: none;">
+                    <div class="luckysheet-icon luckysheet-inline-block" style="display: inline-flex; align-items: center; justify-content: center; width: auto; margin-top: 0;">
+                        <svg t="1732071695259" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4128" width="15" height="15"><path d="M414.72 0a97.92 97.92 0 0 1 96.896 89.728l0.384 8.96v826.624c0 51.456-38.848 93.76-88.448 98.304L414.656 1024H97.344a97.92 97.92 0 0 1-96.96-89.728L0 925.312V98.688C0 47.232 38.848 4.928 88.448 0.384L97.344 0h317.312z m0 64H97.28a33.792 33.792 0 0 0-32.832 29.056L64 98.688v826.624c0 17.408 12.224 31.552 27.968 34.24l5.376 0.448h317.312a33.792 33.792 0 0 0 32.896-29.056L448 925.312V98.688a34.304 34.304 0 0 0-27.968-34.24L414.656 64zM960 736.192v157.12a130.368 130.368 0 0 1-120.064 130.304l-9.728 0.384H640v-64h190.208c33.728 0 61.632-25.92 65.152-59.392l0.448-7.296v-157.12H960zM830.208 0c68.48 0 124.48 53.44 129.408 120.96l0.384 9.728-0.384 157.12h-64.192l0.384-157.12c0-34.432-25.664-62.72-58.496-66.304L830.272 64H640V0h190.208z" fill="#333" p-id="4129"></path><path d="M64 320h384v64H64z" fill="#333" p-id="4130"></path><path d="M844.8 339.2c19.84 0 35.84 16 35.84 35.84v107.52h107.52a35.84 35.84 0 1 1 0 71.68h-107.52v107.52a35.84 35.84 0 1 1-71.68 0V554.24h-107.52a35.84 35.84 0 1 1 0-71.68h107.52V375.04c0-19.84 16-35.84 35.84-35.84z" fill="#333" p-id="4131"></path><path d="M64 640h384v64H64z" fill="#333" p-id="4132"></path></svg>
+                    </div>
+                    <div class="luckysheet-toolbar-menu-button-caption luckysheet-inline-block">组合</div>
+                    <div class="luckysheet-toolbar-menu-button-dropdown luckysheet-inline-block iconfont-luckysheet luckysheet-iconfont-xiayige"
+                    style="user-select: none;">
+                    </div>
+                </div>
+            </div>
+        </div>`,
         undo: `<div class="luckysheet-toolbar-button luckysheet-inline-block disabled" data-tips="${toolbar.undo}"
         id="luckysheet-icon-undo" role="button" style="user-select: none;">
             <div class="luckysheet-toolbar-button-outer-box luckysheet-inline-block"
@@ -695,31 +710,6 @@ export function createToolbarHtml() {
                 </div>
             </div>
         </div>`, //'freeze mode'
-        groupModel: `<div class="luckysheet-toolbar-button-split-left luckysheet-toolbar-button luckysheet-inline-block luckysheet-freezen-btn-horizontal"
-        data-tips="创建/取消组合" id="luckysheet-group-btn-horizontal" role="button" style="user-select: none;">
-            <div class="luckysheet-toolbar-button-outer-box luckysheet-inline-block"
-            style="user-select: none;">
-                <div class="luckysheet-toolbar-menu-button-inner-box luckysheet-inline-block"
-                style="user-select: none;">
-                <svg t="1732020338955" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3663" width="20" height="20"><path d="M175.364267 477.457067v-74.496a28.3392 28.3392 0 0 1 28.343466-28.334934 28.3392 28.3392 0 0 1 28.343467 28.334934v74.496h74.496a28.3392 28.3392 0 0 1 28.334933 28.343466 28.3392 28.3392 0 0 1-28.334933 28.343467h-74.496v74.496a28.3392 28.3392 0 0 1-28.343467 28.334933 28.3392 28.3392 0 0 1-28.343466-28.334933v-74.496h-74.496A28.3392 28.3392 0 0 1 72.533333 505.800533a28.3392 28.3392 0 0 1 28.334934-28.343466h74.496z m272.861866 113.873066h368.366934V409.937067h-368.366934v181.393066z m0 62.353067v158.72a25.506133 25.506133 0 0 0 25.501867 25.5104h317.3632a25.506133 25.506133 0 0 0 25.501867-25.5104v-158.72h-368.366934z m0-306.103467h368.366934V194.530133a25.506133 25.506133 0 0 0-25.501867-25.5104H473.728a25.506133 25.506133 0 0 0-25.501867 25.5104v153.0496zM473.728 106.666667h317.3632C839.6032 106.666667 878.933333 146.005333 878.933333 194.530133v617.873067C878.933333 860.928 839.6032 900.266667 791.0912 900.266667H473.728c-48.512 0-87.842133-39.338667-87.842133-87.863467V194.530133C385.885867 146.005333 425.216 106.666667 473.728 106.666667z" fill="#2C2C2E" p-id="3664"></path></svg>
-                <svg t="1732020230981" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2517" width="20" height="20"><path d="M432.494933 412.770133V350.417067h406.9376v62.353066h-406.9376z m-224.746666 55.7824l52.6976-52.6976a28.343467 28.343467 0 1 1 40.085333 40.081067l-52.6976 52.6976 52.693333 52.6976a28.343467 28.343467 0 1 1-40.081066 40.085333l-52.693334-52.6976-52.701866 52.693334a28.343467 28.343467 0 1 1-40.081067-40.081067l52.6976-52.693333-52.6976-52.701867a28.343467 28.343467 0 1 1 40.081067-40.081067l52.6976 52.693334z m236.087466 125.610667h368.4736V194.530133a25.5104 25.5104 0 0 0-25.5104-25.5104h-317.4528a25.5104 25.5104 0 0 0-25.514666 25.5104v399.633067z m0 62.353067v155.886933a25.5104 25.5104 0 0 0 25.5104 25.5104h317.4528a25.5104 25.5104 0 0 0 25.5104-25.5104v-155.886933h-368.4736zM469.346133 106.666667h317.4528C835.328 106.666667 874.666667 146.005333 874.666667 194.530133v617.873067C874.666667 860.928 835.328 900.266667 786.798933 900.266667h-317.4528c-48.529067 0-87.867733-39.338667-87.867733-87.863467V194.530133C381.4784 146.005333 420.817067 106.666667 469.346133 106.666667z" fill="#2C2C2E" p-id="2518"></path></svg>
-                    <div class="luckysheet-toolbar-menu-button-caption luckysheet-inline-block"
-                    style="user-select: none;">组合</div>
-                </div>
-            </div>
-        </div>
-        <div class="luckysheet-toolbar-button-split-right luckysheet-toolbar-menu-button luckysheet-inline-block"
-        data-tips="${toolbar.moreOptions}..." id="luckysheet-icon-group-menu" role="button" style="user-select: none;">
-            <div class="luckysheet-toolbar-menu-button-outer-box luckysheet-inline-block"
-            style="user-select: none;">
-                <div class="luckysheet-toolbar-menu-button-inner-box luckysheet-inline-block"
-                style="user-select: none;">
-                    <div class="luckysheet-toolbar-menu-button-dropdown luckysheet-inline-block iconfont-luckysheet luckysheet-iconfont-xiayige"
-                    style="user-select: none;">
-                    </div>
-                </div>
-            </div>
-        </div>`, //'group mode'
         sortAndFilter: `<div class="luckysheet-toolbar-select luckysheet-toolbar-menu-button luckysheet-inline-block" data-tips="${toolbar.sortAndFilter}"
         id="luckysheet-icon-autofilter" role="button" style="user-select: none;">
             <div class="luckysheet-toolbar-menu-button-outer-box luckysheet-inline-block"
