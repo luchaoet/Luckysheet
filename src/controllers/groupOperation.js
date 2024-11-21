@@ -3,7 +3,6 @@ import {
     getColsGroupAreaHeight, 
     getGroupConfig, 
     getGroup, 
-    toggleState, 
     rowsOfClickPosition, 
     colsOfClickPosition,
     levelOfRowsGroupClickPosition, 
@@ -20,10 +19,15 @@ export function groupOperationInitial() {
         const offsetY = event.offsetY;
         const bodrder05 = 0.5;
         const { rowsGroupLevel } = getGroup();
-        const { padding, buttonSize, gap } = getGroupConfig();
-        const colsGroupAreaHeight = getColsGroupAreaHeight()
+        const { buttonSize, gap } = getGroupConfig();
+        const colsGroupAreaHeight = getColsGroupAreaHeight();
+        const rowsGroupAreaWidth = getRowsGroupAreaWidth();
+        const levelLength = rowsGroupLevel.length;
+        if(levelLength === 0) return;
+
         let index = null;
-        for (let i = 0; i < rowsGroupLevel.length; i++) {
+        const padding = (rowsGroupAreaWidth - buttonSize * (levelLength + 1) - gap * levelLength) / 2;
+        for (let i = 0; i < levelLength + 1; i++) {
             const x1 = bodrder05 + padding + (buttonSize + gap) * i;
             const x2 = x1 + buttonSize;
             const y1 = colsGroupAreaHeight + Store.columnHeaderHeight / 2 - buttonSize / 2;
@@ -33,14 +37,23 @@ export function groupOperationInitial() {
                 index = i;
             }
         }
+
         if(index === null) return;
 
-        const level = rowsGroupLevel[index];
-        const o = level?.[0].o === 0 ? 1 : 0;
-
-        for (const item of level) {
-            updateGroup('row', `${item.s}_${item.e}`, o);
+        const data = []
+        const openGroup = rowsGroupLevel.slice(0, index);
+        const closeGroup = rowsGroupLevel.slice(index);
+        for (const group of openGroup) {
+            for (const item of group) {
+                data.push({...item, o: 1})
+            }
         }
+        for (const group of closeGroup) {
+            for (const item of group) {
+                data.push({...item, o: 0})
+            }
+        }
+        updateGroup('row', data);
         jfrefreshgrid_rhcw(Store.flowdata.length, Store.flowdata[0].length);
     })
 
@@ -57,7 +70,7 @@ export function groupOperationInitial() {
         // 处理最后一个按钮的展开或收起 便于层层打开
         const targetGroup = level.reverse().find(i => rows.includes(i.e))
         if(targetGroup) {
-            updateGroup('row', `${targetGroup.s}_${targetGroup.e}`, targetGroup.o === 0 ? 1 : 0);
+            updateGroup('row', {...targetGroup, o: targetGroup.o === 0 ? 1 : 0});
             jfrefreshgrid_rhcw(Store.flowdata.length, Store.flowdata[0].length);
         }
     })
@@ -68,9 +81,14 @@ export function groupOperationInitial() {
         const offsetY = event.offsetY;
         const bodrder05 = 0.5;
         const { colsGroupLevel } = getGroup();
-        const { padding, buttonSize, gap } = getGroupConfig();
+        const { buttonSize, gap } = getGroupConfig();
+        const colsGroupAreaHeight = getColsGroupAreaHeight();
+        const levelLength = colsGroupLevel.length;
+        if(levelLength === 0) return;
+
         let index = null;
-        for (let i = 0; i < colsGroupLevel.length; i++) {
+        const padding = (colsGroupAreaHeight - buttonSize * (levelLength + 1) - gap * levelLength) / 2;
+        for (let i = 0; i < levelLength + 1; i++) {
             const x1 = Store.rowHeaderWidth / 2 - buttonSize / 2;
             const x2 = x1 + buttonSize;
             const y1 = bodrder05 + padding + (buttonSize + gap) * i;
@@ -80,14 +98,23 @@ export function groupOperationInitial() {
                 index = i;
             }
         }
+
         if(index === null) return;
 
-        const level = colsGroupLevel[index];
-        const o = level?.[0].o === 0 ? 1 : 0;
-
-        for (const item of level) {
-            updateGroup('col', `${item.s}_${item.e}`, o);
+        const data = []
+        const openGroup = colsGroupLevel.slice(0, index);
+        const closeGroup = colsGroupLevel.slice(index);
+        for (const group of openGroup) {
+            for (const item of group) {
+                data.push({...item, o: 1})
+            }
         }
+        for (const group of closeGroup) {
+            for (const item of group) {
+                data.push({...item, o: 0})
+            }
+        }
+        updateGroup('col', data);
         jfrefreshgrid_rhcw(Store.flowdata.length, Store.flowdata[0].length);
     })
 
@@ -104,7 +131,7 @@ export function groupOperationInitial() {
         // 处理最后一个按钮的展开或收起 便于层层打开
         const targetGroup = level.reverse().find(i => cols.includes(i.e))
         if(targetGroup) {
-            updateGroup('col', `${targetGroup.s}_${targetGroup.e}`, targetGroup.o === 0 ? 1 : 0);
+            updateGroup('col', {...targetGroup, o: targetGroup.o === 0 ? 1 : 0});
             jfrefreshgrid_rhcw(Store.flowdata.length, Store.flowdata[0].length);
         }
     })

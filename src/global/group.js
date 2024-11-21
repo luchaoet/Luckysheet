@@ -1,3 +1,4 @@
+import luckysheetConfigsetting from "../controllers/luckysheetConfigsetting";
 import Store from "../store";
 
 function jfredoPush(oldRowsGroup, oldColsGroup) {
@@ -27,33 +28,75 @@ export function clearGroup() {
   jfredoPush(rowsGroup, colsGroup)
 }
 
-export function addRowsGroupItem(s, e, o = 1) {
+export function addRowsGroupItem(s, e, o = 1, histroy = true) {
   if(!Store.config.rowsGroup) {
     Store.config.rowsGroup = {}
   }
   const { rowsGroup, colsGroup } = getCopyGroup();
-  const key = `${s}_${e}`;
-  Store.config.rowsGroup[key] = {s, e, o: o >= 1 ? 1 : 0}
-  jfredoPush(rowsGroup, colsGroup)
+  // 新增时和之前的分组首位相连
+  const continueGroup = Object.values(rowsGroup).filter(i => i.s === e + 1 || i.e === s - 1);
+  if(continueGroup.length) {
+    const startPos = continueGroup.map(i => i.s);
+    const endPos = continueGroup.map(i => i.e);
+    const minStart = Math.min(s, ...startPos);
+    const maxEnd = Math.max(e, ...endPos);
+    for (const item of continueGroup) {
+      delete Store.config.rowsGroup[`${item.s}_${item.e}`];
+    }
+    Store.config.rowsGroup[`${minStart}_${maxEnd}`] = {s: minStart, e: maxEnd, o: 1}
+    
+  }else{
+    const key = `${s}_${e}`;
+    Store.config.rowsGroup[key] = {s, e, o: o >= 1 ? 1 : 0}
+  }
+  histroy && jfredoPush(rowsGroup, colsGroup)
 }
 
-export function addColsGroupItem(s, e, o = 1) {
+export function addColsGroupItem(s, e, o = 1, histroy = true) {
   if(!Store.config.colsGroup) {
     Store.config.colsGroup = {}
   }
   const { rowsGroup, colsGroup } = getCopyGroup();
-  const key = `${s}_${e}`;
-  Store.config.colsGroup[key] = {s, e, o: o >= 1 ? 1 : 0}
-  jfredoPush(rowsGroup, colsGroup)
+  // 新增时和之前的分组首位相连
+  const continueGroup = Object.values(colsGroup).filter(i => i.s === e + 1 || i.e === s - 1);
+  if(continueGroup.length) {
+    const startPos = continueGroup.map(i => i.s);
+    const endPos = continueGroup.map(i => i.e);
+    const minStart = Math.min(s, ...startPos);
+    const maxEnd = Math.max(e, ...endPos);
+    for (const item of continueGroup) {
+      delete Store.config.colsGroup[`${item.s}_${item.e}`];
+    }
+    Store.config.colsGroup[`${minStart}_${maxEnd}`] = {s: minStart, e: maxEnd, o: 1}
+    
+  }else{
+    const key = `${s}_${e}`;
+    Store.config.colsGroup[key] = {s, e, o: o >= 1 ? 1 : 0}
+  }
+  histroy && jfredoPush(rowsGroup, colsGroup)
 }
 
-export function updateGroup(type, key, o) {
-  const [s,e] = key.split('_').map(i => Number(i))
-  if(type === 'row') {
-    addRowsGroupItem(s,e,o)
+export function updateGroup(type, data) {
+  let d = [];
+  if(Array.isArray(data)) {
+    d = data.filter(i => typeof i.s === 'number' && typeof i.e === 'number' && typeof i.o === 'number');
   }else{
-    addColsGroupItem(s,e,o)
+    const s = data.s;
+    const e = data.e;
+    const o = data.o;
+    if(typeof s === 'number' && typeof e === 'number' && typeof o === 'number') {
+      d.push({s, e, o})
+    }
   }
+  const { rowsGroup, colsGroup } = getCopyGroup();
+  for (const { s, e, o } of d) {
+    if(type === 'row') {
+      addRowsGroupItem(s, e, o, false)
+    }else{
+      addColsGroupItem(s, e, o, false)
+    }
+  }
+  jfredoPush(rowsGroup, colsGroup)
 }
 
 export function deleteRowsGroupItem(s, e) {
@@ -77,15 +120,16 @@ export function deleteColsGroupItem(s, e) {
 function getLevelGroup(data) {
   // 没有交集 可归为一组
   const result = []
+  data.sort((a, b) => (b.e - b.s) - (a.e - a.s))
   for (const item of data) {
-    const index = result.findIndex(i => i.every(j => j.e < item.s - 1 || j.s > item.e + 1))
+    const index = result.findIndex(i => i.every(j => j.e < item.s || j.s > item.e))
     if(index === -1) {
       result.push(new Array({...item}))
     }else{
       result[index].push({...item})
     }
   }
-  return result
+  return result.map(i => i.sort((a, b) => a.e - b.e))
 }
 
 export function getGroup() {
@@ -117,17 +161,6 @@ export function getColsGroupAreaHeight() {
   const len = colsGroupLevel.length;
   // 边距 + 按钮总高度 + 按钮之间的距离
   return len === 0 ? 0 : padding * 2 + (buttonSize + gap) * len + buttonSize / 2;
-}
-
-export function toggleState(type, index) {
-  const { rowsGroupLevel, colsGroupLevel } = getGroup();
-  const group = Object.values(type === 'row' ? rowsGroupLevel : colsGroupLevel)[index]
-  if(group.length) {
-    const o = group[0].o;
-    for (const {s, e} of group) {
-      updateGroup(type, `${s}_${e}`, o === 0 ? 1 : 0)
-    }
-  }
 }
 
 export function getGroupConfig() {
@@ -180,25 +213,29 @@ export function isCloseColRange(s, e) {
 export function rowsOfClickPosition(offsetY) {
   const y = offsetY + $("#luckysheet-rows-h").scrollTop();
   const rows = [];
-  const { buttonSize } = getGroupConfig()
+  const { buttonSize } = getGroupConfig();
   for (let i = 0; i < Store.visibledatarow.length; i++) {
-    const row = Store.visibledatarow[i];
-    if(y < row) break;
-    if(y >= row && y <= row + buttonSize) {
-        rows.push(i)
+    const rowlen = (Store.config.rowlen?.[i + 1] || luckysheetConfigsetting.defaultRowHeight) * Store.zoomRatio;
+    const y1 = Store.visibledatarow[i] + rowlen / 2 - buttonSize / 2;
+    const y2 = Store.visibledatarow[i] + rowlen / 2 + buttonSize / 2;
+
+    if(y >= y1 && y <= y2) {
+      rows.push(i)
     }
   }
   return rows
 }
+
 export function colsOfClickPosition(offsetX) {
   let x = offsetX + $("#luckysheet-cols-h-c").scrollLeft();
-
   const cols = [];
-  const { buttonSize } = getGroupConfig()
+  const { buttonSize } = getGroupConfig();
   for (let i = 0; i < Store.visibledatacolumn.length; i++) {
-    const col = Store.visibledatacolumn[i];
-    if(x < col) break;
-    if(x >= col && x <= col + buttonSize) {
+    const columnlen = (Store.config.columnlen?.[i + 1] || luckysheetConfigsetting.defaultColWidth) * Store.zoomRatio;
+    const x1 = Store.visibledatacolumn[i] + columnlen / 2 - buttonSize / 2;
+    const x2 = Store.visibledatacolumn[i] + columnlen / 2 + buttonSize / 2;
+
+    if(x >= x1 && x <= x2) {
       cols.push(i)
     }
   }

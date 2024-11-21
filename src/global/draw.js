@@ -20,6 +20,7 @@ import Store from "../store";
 import locale from "../locale/locale";
 import sheetmanage from "../controllers/sheetmanage";
 import { getGroup, getRowsGroupAreaWidth, getColsGroupAreaHeight, getGroupConfig, isCloseRowRange, isCloseColRange } from './group'
+import luckysheetConfigsetting from "../controllers/luckysheetConfigsetting";
 
 function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
     if (scrollHeight == null) {
@@ -69,7 +70,8 @@ function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
             const visibledatarow = s === 0 ? 0 : Store.visibledatarow[s - 1];
             const horizonPos = bodrder05 + padding + buttonSize / 2 + (buttonSize + gap) * i;
             const verticalStartPos = colsGroupAreaHeight + visibledatarow - scrollHeight + offsetTop + 1;
-            const verticalEndPos = colsGroupAreaHeight + Store.visibledatarow[e] - scrollHeight + offsetTop + 1;
+            const rowlen = (Store.config.rowlen?.[e + 1] || luckysheetConfigsetting.defaultRowHeight) * Store.zoomRatio;
+            const verticalEndPos = colsGroupAreaHeight + Store.visibledatarow[e] - scrollHeight + offsetTop + rowlen / 2;
 
             // 大括号
             luckysheetTableContent.save();
@@ -92,8 +94,8 @@ function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
                 const inNextLine = i < rowsGroupLevel.length - 1 && 
                 rowsGroupLevel[i + 1].some(r => r.s <= j && r.e >= j);
                 if( isHidden || isClose || inNextLine) continue
-                
-                const rowlen = (Store.config.rowlen?.[j] || 20) * Store.zoomRatio;
+
+                const rowlen = (Store.config.rowlen?.[j] || luckysheetConfigsetting.defaultRowHeight) * Store.zoomRatio;
                 const horizonPos = bodrder05 + padding + buttonSize / 2 + (buttonSize + gap) * (i + 1);
                 const verticalPos = colsGroupAreaHeight + Store.visibledatarow[j] - scrollHeight + offsetTop - rowlen / 2;
 
@@ -109,10 +111,14 @@ function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
 
     // 避免被大括号线条干扰 在其后单独绘制线条上的按钮
     for (let i = 0; i < rowsGroupLevel.length; i++) {
+        // 前一层级全部收起 则不绘制当前层级的按钮
+        const isClosePreGroupLevel = i === 0 ? false : rowsGroupLevel[i - 1].every(g => g.o === 0);
+        if(isClosePreGroupLevel) continue;
         for (const item of rowsGroupLevel[i]) {
             const { e, o } = item;
+            const rowlen = (Store.config.rowlen?.[e + 1] || luckysheetConfigsetting.defaultRowHeight) * Store.zoomRatio;
             const horizonPos = bodrder05 + padding + (buttonSize + gap) * i;
-            const verticalPos = colsGroupAreaHeight + Store.visibledatarow[e] - scrollHeight + offsetTop;
+            const verticalPos = colsGroupAreaHeight + Store.visibledatarow[e] - scrollHeight + offsetTop + rowlen / 2 - buttonSize / 2;
             // 按钮
             luckysheetTableContent.lineWidth = lineWidth;
             luckysheetTableContent.fillStyle = strokeStyle;
@@ -152,25 +158,30 @@ function luckysheetDrawgridRowGroup(scrollHeight, drawHeight, offsetTop) {
     luckysheetTableContent.stroke();
     luckysheetTableContent.closePath();
 
-    for (let i = 0; i < rowsGroupLevel.length; i++) {
-        luckysheetTableContent.lineWidth = 1;
-        luckysheetTableContent.fillStyle = '#ededed';
-        luckysheetTableContent.textAlign = 'center';
-        luckysheetTableContent.textBaseline = 'middle';  
-        luckysheetTableContent.font = 'middle';  
-        luckysheetTableContent.font = `${10 * Store.zoomRatio}px Arial`;
-        
-        const horizonPos = bodrder05 + padding + (buttonSize + gap) * i;
-        const verticalPos = colsGroupAreaHeight + Store.columnHeaderHeight / 2 - buttonSize / 2;
-        luckysheetTableContent.beginPath();
-        luckysheetTableContent.fillRect(horizonPos, verticalPos, buttonSize, buttonSize);
-        luckysheetTableContent.closePath();
-        luckysheetTableContent.fillStyle = '#000';
-        luckysheetTableContent.fillText(
-            i+1,
-            horizonPos + buttonSize / 2, 
-            verticalPos + buttonSize / 2
-        );
+    // 行分组左上角按钮
+    const levelLength = rowsGroupLevel.length;
+    if(levelLength) {
+        const padding = (rowsGroupAreaWidth - buttonSize * (levelLength + 1) - gap * levelLength) / 2;
+        for (let i = 0; i < levelLength + 1; i++) {
+            luckysheetTableContent.lineWidth = 1;
+            luckysheetTableContent.fillStyle = '#ededed';
+            luckysheetTableContent.textAlign = 'center';
+            luckysheetTableContent.textBaseline = 'middle';  
+            luckysheetTableContent.font = 'middle';  
+            luckysheetTableContent.font = `${10 * Store.zoomRatio}px Arial`;
+            
+            const horizonPos = bodrder05 + padding + (buttonSize + gap) * i;
+            const verticalPos = colsGroupAreaHeight + Store.columnHeaderHeight / 2 - buttonSize / 2;
+            luckysheetTableContent.beginPath();
+            luckysheetTableContent.fillRect(horizonPos, verticalPos, buttonSize, buttonSize);
+            luckysheetTableContent.closePath();
+            luckysheetTableContent.fillStyle = '#000';
+            luckysheetTableContent.fillText(
+                i+1,
+                horizonPos + buttonSize / 2, 
+                verticalPos + buttonSize / 2
+            );
+        }
     }
     luckysheetTableContent.restore();
 }
@@ -228,7 +239,8 @@ function luckysheetDrawgridColumnGroup(scrollWidth, drawWidth, offsetLeft) {
             const visibledatacolumn = s === 0 ? 0 : Store.visibledatacolumn[s - 1];
             const verticalPos = bodrder05 + padding + buttonSize / 2 + (buttonSize + gap) * i;
             const horizonStartPos = rowsGroupAreaWidth + visibledatacolumn - scrollWidth + offsetLeft + 1;
-            const horizonEndPos = rowsGroupAreaWidth + Store.visibledatacolumn[e] - scrollWidth + offsetLeft + 1;
+            const columnlen = (Store.config.columnlen?.[e + 1] || luckysheetConfigsetting.defaultColWidth) * Store.zoomRatio;
+            const horizonEndPos = rowsGroupAreaWidth + Store.visibledatacolumn[e] - scrollWidth + offsetLeft + columnlen / 2;
 
             // 大括号
             luckysheetTableContent.save();
@@ -270,7 +282,9 @@ function luckysheetDrawgridColumnGroup(scrollWidth, drawWidth, offsetLeft) {
     for (let i = 0; i < colsGroupLevel.length; i++) {
         for (const item of colsGroupLevel[i]) {
             const { e, o } = item;
-            const horizonPos = rowsGroupAreaWidth + Store.visibledatacolumn[e] - scrollWidth + offsetLeft;
+            
+            const columnlen = (Store.config.columnlen?.[e + 1] || luckysheetConfigsetting.defaultColWidth) * Store.zoomRatio;
+            const horizonPos = rowsGroupAreaWidth + Store.visibledatacolumn[e] - scrollWidth + offsetLeft + columnlen / 2 - buttonSize / 2;
             const verticalPos = bodrder05 + padding + (buttonSize + gap) * i;
             // 按钮
             luckysheetTableContent.save();
@@ -312,25 +326,32 @@ function luckysheetDrawgridColumnGroup(scrollWidth, drawWidth, offsetLeft) {
     luckysheetTableContent.stroke();
     luckysheetTableContent.closePath();
 
-    for (let i = 0; i < colsGroupLevel.length; i++) {
-        luckysheetTableContent.lineWidth = 1;
-        luckysheetTableContent.fillStyle = '#ededed';
-        luckysheetTableContent.textAlign = 'center';
-        luckysheetTableContent.textBaseline = 'middle';  
-        luckysheetTableContent.font = 'middle';  
-        luckysheetTableContent.font = `${10 * Store.zoomRatio}px Arial`;
-
-        const horizonPos = rowsGroupAreaWidth + Store.rowHeaderWidth / 2 - buttonSize / 2;
-        const verticalPos = bodrder05 + padding + (buttonSize + gap) * i;
-
-        luckysheetTableContent.fillRect(horizonPos, verticalPos, buttonSize, buttonSize);
-        luckysheetTableContent.fillStyle = '#000';
-        luckysheetTableContent.fillText(
-            i+1,
-            horizonPos + buttonSize / 2, 
-            verticalPos + buttonSize / 2
-        );
+    // 列分组左上角按钮
+    const levelLength = colsGroupLevel.length;
+    if(levelLength) {
+        const padding = (colsGroupAreaHeight - buttonSize * (levelLength + 1) - gap * levelLength) / 2;
+        for (let i = 0; i < levelLength + 1; i++) {
+            luckysheetTableContent.lineWidth = 1;
+            luckysheetTableContent.fillStyle = '#ededed';
+            luckysheetTableContent.textAlign = 'center';
+            luckysheetTableContent.textBaseline = 'middle';  
+            luckysheetTableContent.font = 'middle';  
+            luckysheetTableContent.font = `${10 * Store.zoomRatio}px Arial`;
+    
+            const horizonPos = rowsGroupAreaWidth + Store.rowHeaderWidth / 2 - buttonSize / 2;
+            const verticalPos = bodrder05 + padding + (buttonSize + gap) * i;
+            luckysheetTableContent.beginPath();
+            luckysheetTableContent.fillRect(horizonPos, verticalPos, buttonSize, buttonSize);
+            luckysheetTableContent.closePath();
+            luckysheetTableContent.fillStyle = '#000';
+            luckysheetTableContent.fillText(
+                i+1,
+                horizonPos + buttonSize / 2, 
+                verticalPos + buttonSize / 2
+            );
+        }
     }
+
     luckysheetTableContent.restore();
 }
 
@@ -564,7 +585,7 @@ function luckysheetDrawgridColumnTitle(scrollWidth, drawWidth, offsetLeft) {
         .getContext("2d");
     luckysheetTableContent.save();
     luckysheetTableContent.scale(Store.devicePixelRatio, Store.devicePixelRatio);
-    // luckysheetTableContent.clearRect(offsetLeft, 0, drawWidth, Store.columnHeaderHeight + colsGroupAreaHeight - 1);
+    luckysheetTableContent.clearRect(offsetLeft + rowsGroupAreaWidth, colsGroupAreaHeight, drawWidth, Store.columnHeaderHeight);
 
     luckysheetTableContent.font = luckysheetdefaultFont();
     luckysheetTableContent.textBaseline = luckysheetdefaultstyle.textBaseline; //基准线 垂直居中
@@ -583,7 +604,7 @@ function luckysheetDrawgridColumnTitle(scrollWidth, drawWidth, offsetLeft) {
 
     luckysheetTableContent.save();
     luckysheetTableContent.beginPath();
-    luckysheetTableContent.rect(offsetLeft - 1 + rowsGroupAreaWidth, rowsGroupAreaWidth, drawWidth, Store.columnHeaderHeight + colsGroupAreaHeight - 1);
+    luckysheetTableContent.rect(offsetLeft + rowsGroupAreaWidth, colsGroupAreaHeight, drawWidth, Store.columnHeaderHeight);
     luckysheetTableContent.clip();
     luckysheetTableContent.closePath()
 
