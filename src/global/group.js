@@ -1,38 +1,50 @@
 import Store from "../store";
 
+function jfredoPush(oldRowsGroup, oldColsGroup) {
+  const rowsGroup = Store.config.rowsGroup || {};
+  const colsGroup = Store.config.colsGroup || {};
+  const redo = { 
+    type: 'updateGroup',
+    rowsGroup: oldRowsGroup,
+    colsGroup: oldColsGroup,
+    curRowsGroup: $.extend(true, {}, rowsGroup),
+    curColsGroup: $.extend(true, {}, colsGroup),
+  };
+  Store.jfredo.push(redo);
+}
+
+function getCopyGroup() {
+  return {
+    rowsGroup: $.extend(true, {}, Store.config?.rowsGroup || {}),
+    colsGroup: $.extend(true, {}, Store.config?.colsGroup || {})
+  }
+}
+
 export function clearGroup() {
+  const { rowsGroup, colsGroup } = getCopyGroup();
   Store.config.rowsGroup = {}
   Store.config.colsGroup = {}
+  jfredoPush(rowsGroup, colsGroup)
 }
 
 export function addRowsGroupItem(s, e, o = 1) {
   if(!Store.config.rowsGroup) {
     Store.config.rowsGroup = {}
   }
+  const { rowsGroup, colsGroup } = getCopyGroup();
   const key = `${s}_${e}`;
   Store.config.rowsGroup[key] = {s, e, o: o >= 1 ? 1 : 0}
-}
-
-export function deleteRowsGroupItem(s, e) {
-  const key = `${s}_${e}`;
-  if(Store.config.rowsGroup && key in Store.config.rowsGroup) {
-    delete Store.config.rowsGroup[key]
-  }
-}
-
-export function deleteColsGroupItem(s, e) {
-  const key = `${s}_${e}`;
-  if(Store.config.colsGroup && key in Store.config.colsGroup) {
-    delete Store.config.colsGroup[key]
-  }
+  jfredoPush(rowsGroup, colsGroup)
 }
 
 export function addColsGroupItem(s, e, o = 1) {
   if(!Store.config.colsGroup) {
     Store.config.colsGroup = {}
   }
+  const { rowsGroup, colsGroup } = getCopyGroup();
   const key = `${s}_${e}`;
   Store.config.colsGroup[key] = {s, e, o: o >= 1 ? 1 : 0}
+  jfredoPush(rowsGroup, colsGroup)
 }
 
 export function updateGroup(type, key, o) {
@@ -44,11 +56,29 @@ export function updateGroup(type, key, o) {
   }
 }
 
+export function deleteRowsGroupItem(s, e) {
+  const key = `${s}_${e}`;
+  if(Store.config.rowsGroup && key in Store.config.rowsGroup) {
+    const { rowsGroup, colsGroup } = getCopyGroup();
+    delete Store.config.rowsGroup[key]
+    jfredoPush(rowsGroup, colsGroup)
+  }
+}
+
+export function deleteColsGroupItem(s, e) {
+  const key = `${s}_${e}`;
+  if(Store.config.colsGroup && key in Store.config.colsGroup) {
+    const { rowsGroup, colsGroup } = getCopyGroup();
+    delete Store.config.colsGroup[key]
+    jfredoPush(rowsGroup, colsGroup)
+  }
+}
+
 function getLevelGroup(data) {
   // 没有交集 可归为一组
   const result = []
   for (const item of data) {
-    const index = result.findIndex(i => i.every(j => j.e < item.s || j.s > item.e))
+    const index = result.findIndex(i => i.every(j => j.e < item.s - 1 || j.s > item.e + 1))
     if(index === -1) {
       result.push(new Array({...item}))
     }else{

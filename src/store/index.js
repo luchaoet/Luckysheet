@@ -168,5 +168,5 @@ const Store = {
     conditionFormatCells: {}, // 条件格式高亮的单元格
 
 }
-
+window.Store = Store
 export default Store;

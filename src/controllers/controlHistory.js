@@ -429,6 +429,12 @@ const controlHistory = {
             zoomNumberDomBind();
             zoomRefreshView();
         }
+        else if (ctr.type=="updateGroup"){
+            Store.config.rowsGroup = $.extend(true, {}, ctr.rowsGroup); 
+            Store.config.colsGroup = $.extend(true, {}, ctr.colsGroup); 
+            //行高、列宽 刷新  
+            jfrefreshgrid_rhcw(Store.flowdata.length, Store.flowdata[0].length);
+        }
         
         cleargridelement(e);
         if (ctr.range) {
@@ -751,6 +757,12 @@ const controlHistory = {
             server.saveParam("all", ctr.sheetIndex, ctr.curZoomRatio, { "k": "zoomRatio" });
             zoomNumberDomBind();
             zoomRefreshView();
+        }
+        else if (ctr.type=="updateGroup"){
+            Store.config.rowsGroup = $.extend(true, {}, ctr.curRowsGroup); 
+            Store.config.colsGroup = $.extend(true, {}, ctr.curColsGroup);
+            //行高、列宽 刷新  
+            jfrefreshgrid_rhcw(Store.flowdata.length, Store.flowdata[0].length);
         }
 
         if (ctr.range) {
