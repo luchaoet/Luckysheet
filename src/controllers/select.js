@@ -36,7 +36,6 @@ function selectHightlightShow(isRestore = false) {
                 r2 = Store.luckysheet_select_save[i].row[1];
             let c1 = Store.luckysheet_select_save[i].column[0],
                 c2 = Store.luckysheet_select_save[i].column[1];
-
             let rf, cf;
             if (Store.luckysheet_select_save[i].row_focus == null) {
                 rf = r1;

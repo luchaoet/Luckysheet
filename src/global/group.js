@@ -33,14 +33,17 @@ export function addRowsGroupItem(s, e, o = 1, histroy = true) {
     Store.config.rowsGroup = {}
   }
   const { rowsGroup, colsGroup } = getCopyGroup();
+  const { rowsGroupLevelFlatten } = getGroup();
   // 新增时和之前的分组首位相连
-  const continueGroup = Object.values(rowsGroup).filter(i => i.s === e + 1 || i.e === s - 1);
-  if(continueGroup.length) {
-    const startPos = continueGroup.map(i => i.s);
-    const endPos = continueGroup.map(i => i.e);
+  const chain1 = rowsGroupLevelFlatten.find(i => i.e === s - 1);
+  const chain2 = rowsGroupLevelFlatten.find(i => i.s === e + 1);
+  const chainGroup = new Array(chain1, chain2).filter(i => !!i);
+  if(chainGroup.length) {
+    const startPos = chainGroup.map(i => i.s);
+    const endPos = chainGroup.map(i => i.e);
     const minStart = Math.min(s, ...startPos);
     const maxEnd = Math.max(e, ...endPos);
-    for (const item of continueGroup) {
+    for (const item of chainGroup) {
       delete Store.config.rowsGroup[`${item.s}_${item.e}`];
     }
     Store.config.rowsGroup[`${minStart}_${maxEnd}`] = {s: minStart, e: maxEnd, o: 1}
@@ -57,14 +60,17 @@ export function addColsGroupItem(s, e, o = 1, histroy = true) {
     Store.config.colsGroup = {}
   }
   const { rowsGroup, colsGroup } = getCopyGroup();
+  const { colsGroupLevelFlatten } = getGroup();
   // 新增时和之前的分组首位相连
-  const continueGroup = Object.values(colsGroup).filter(i => i.s === e + 1 || i.e === s - 1);
-  if(continueGroup.length) {
-    const startPos = continueGroup.map(i => i.s);
-    const endPos = continueGroup.map(i => i.e);
+  const chain1 = colsGroupLevelFlatten.find(i => i.e === s - 1);
+  const chain2 = colsGroupLevelFlatten.find(i => i.s === e + 1);
+  const chainGroup = new Array(chain1, chain2).filter(i => !!i);
+  if(chainGroup.length) {
+    const startPos = chainGroup.map(i => i.s);
+    const endPos = chainGroup.map(i => i.e);
     const minStart = Math.min(s, ...startPos);
     const maxEnd = Math.max(e, ...endPos);
-    for (const item of continueGroup) {
+    for (const item of chainGroup) {
       delete Store.config.colsGroup[`${item.s}_${item.e}`];
     }
     Store.config.colsGroup[`${minStart}_${maxEnd}`] = {s: minStart, e: maxEnd, o: 1}
@@ -129,7 +135,10 @@ function getLevelGroup(data) {
       result[index].push({...item})
     }
   }
-  return result.map(i => i.sort((a, b) => a.e - b.e))
+  return {
+    levelGroupFlatten: data,
+    levelGroup: result.map(i => i.sort((a, b) => a.e - b.e))
+  }
 }
 
 export function getGroup() {
@@ -139,11 +148,15 @@ export function getGroup() {
   if(!Store.config.colsGroup) {
     Store.config.colsGroup = {}
   }
+  const { levelGroupFlatten: rowsGroupLevelFlatten, levelGroup: rowsGroupLevel } = getLevelGroup(Object.values(Store.config.rowsGroup));
+  const { levelGroupFlatten: colsGroupLevelFlatten, levelGroup: colsGroupLevel } = getLevelGroup(Object.values(Store.config.colsGroup));
   return {
     rowsGroup: Store.config.rowsGroup,
     colsGroup: Store.config.colsGroup,
-    rowsGroupLevel: getLevelGroup(Object.values(Store.config.rowsGroup)),
-    colsGroupLevel: getLevelGroup(Object.values(Store.config.colsGroup)),
+    rowsGroupLevel,
+    colsGroupLevel,
+    rowsGroupLevelFlatten,
+    colsGroupLevelFlatten,
   }
 }
 
